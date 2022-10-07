@@ -1,0 +1,52 @@
+# ##########################################
+# MEMO
+#
+# volumes:
+#  - /sys/fs/cgroup:/sys/fs/cgroup:ro
+# tty: true
+# privileged: true
+#
+# amazonlinux2 で/sbin/initが起動せず、systemdがdockerfileから触れない対策
+# ##########################################
+version: "3.9"
+services:
+  go_echo:
+    image: jump_in_echo
+    container_name: go_echo
+    build: ./go
+    ports:
+      - "80:80"
+    environment:
+      - PG_DB_USER
+      - PG_DB_PASS
+      - PG_INSTANCE_HOST
+      - PG_DB_PORT
+      - PG_DB_NAME
+      - SESSION_STORE_SECURE_KEY
+      - SESSION_NAME
+      - SESSION_VAR_NAME
+      - SMTP_SERVER_NAME
+      - SMTP_SERVER_PORT
+      - SMTP_SERVER_PASSWORD
+    volumes:
+      - ./go:/usr/src/app
+      - ./svelte/dist:/var/www/dist
+      - ./go/docker:/var/www/docker
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    tty: true
+    privileged: true
+  db_pg:
+#    image: postgres:14
+    image: jump_in_pg
+    build: ./pg
+    container_name: db_pg
+    ports:
+      - "5432:5432"
+    environment:
+      # 開発用
+      - POSTGRES_PASSWORD
+      - POSTGRES_USER
+      - POSTGRES_DB
+    volumes:
+      - ./pg:/var/data
+      - ./pg/ddl:/docker-entrypoint-initdb.d

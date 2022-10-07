@@ -1,0 +1,13 @@
+# @REF https://github.com/volatiletech/sqlboiler#configuration
+
+[psql]
+schema = ""
+dbname = ""       #  required
+host = ""         #  required
+port =
+user = ""         #  required
+pass = ""
+
+sslmode = "disable"
+#whitelist = []
+#blacklist = []
