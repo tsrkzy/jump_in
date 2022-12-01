@@ -14,7 +14,7 @@ func ErrorIntoJson(e error) response.Errors {
 	vErr := response.Errors{}
 	for _, err := range errs {
 		m := fmt.Sprintf("%s", err)
-		vErr.Add(response.Error{Msg: m})
+		vErr.Add(response.ErrorSeed{Msg: m})
 	}
 	return vErr
 }

@@ -42,7 +42,6 @@ func Authenticate() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, response.Errors{})
 		}
 
-		exceedThrottle := false
 		ar := Result{}
 		ctx := context.Background()
 		/* open DB Tx */
@@ -57,8 +56,7 @@ func Authenticate() echo.HandlerFunc {
 
 				/* スロットル: 同じメールアドレスについて、10分に3回まで */
 				if err := ThrottleLimitCheck(&ctx, tx, r.Email); err != nil {
-					exceedThrottle = true
-					return errors.New("exceed throttle")
+					return response.NewErrorSeed(http.StatusTooManyRequests, "時間を置いて再度リクエストしてください")
 				}
 
 				/* url_hash生成 */
@@ -112,9 +110,9 @@ func Authenticate() echo.HandlerFunc {
 			})
 		})
 		if err != nil {
-			if exceedThrottle {
-				lg.Error(err)
-				return c.JSON(http.StatusTooManyRequests, response.ErrorGen("時間を置いて再度リクエストしてください"))
+			lg.Error(err)
+			if es, ok := err.(response.ErrorSeed); ok {
+				return c.JSON(es.Code, response.ErrorGen(es.Msg))
 			}
 
 			lg.Error(err)
@@ -144,7 +142,7 @@ func MagicLink() echo.HandlerFunc {
 		/* open DB Tx */
 		err = myDB.Tx(ctx, func(tx *sql.Tx) error {
 			/* Open session store */
-			err := sess.Open(c, myDB, func(s *sessions.Session) error {
+			return sess.Open(c, myDB, func(s *sessions.Session) error {
 
 				/* chocochip の検証 */
 				cc := s.Values[sess.SvNameChocochip()]
@@ -181,7 +179,6 @@ func MagicLink() echo.HandlerFunc {
 
 				return nil
 			})
-			return err
 		})
 		if err != nil {
 			lg.Error(err)

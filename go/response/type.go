@@ -1,25 +1,40 @@
 package response
 
+import "fmt"
+
 type Errors struct {
-	Errors []Error `json:"errors"`
+	Errors []ErrorSeed `json:"errors"`
 }
 
-func (s *Errors) Add(e Error) Errors {
+func (s *Errors) Add(e ErrorSeed) Errors {
 	s.Errors = append(s.Errors, e)
 	return *s
 }
 
 // ErrorGen
-// 1つだけ Error を持つ Errors を返す時に便利なやつ
+// 1つだけ ErrorSeed を持つ Errors を返す時に便利なやつ
 // DB接続エラーとかの toC で出せない無言エラーを生成するときは Errors{} で
 func ErrorGen(msg string) Errors {
 	s := Errors{}
-	s.Add(Error{Msg: msg})
+	s.Add(ErrorSeed{Msg: msg})
 	return s
 }
 
-type Error struct {
-	Msg string `json:"msg"`
+// ErrorSeed ロジックの中からステータスコードを持った error を返す用
+// NewErrorSeed から作成する想定
+type ErrorSeed struct {
+	Code int    `json:"-"`
+	Msg  string `json:"msg"`
+}
+
+// Error error の interface の実装
+func (e ErrorSeed) Error() string {
+	return fmt.Sprintf("%s", e.Msg)
+}
+
+// ErrorSeed を作成して返す
+func NewErrorSeed(code int, msg string) ErrorSeed {
+	return ErrorSeed{code, msg}
 }
 
 // OK

@@ -3,6 +3,7 @@ package event
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
 	"github.com/tsrkzy/jump_in/authenticate"
@@ -153,9 +154,6 @@ func Detail() echo.HandlerFunc {
 			vErr := validate.ErrorIntoJson(err)
 			return c.JSON(http.StatusBadRequest, vErr)
 		}
-		lg.Info("r")
-		lg.Info(r)
-		lg.Info(r.EventId)
 
 		/* db接続 */
 		myDB, err := database.Open()
@@ -164,15 +162,14 @@ func Detail() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, response.Errors{})
 		}
 
-		notFound := false
 		dr := &DetailResponse{}
 
 		ctx := context.Background()
 		err = myDB.Tx(ctx, func(tx *sql.Tx) error {
 			e, err := models.Events(qm.Where("id = ?", r.EventId)).One(ctx, tx)
 			if err != nil {
-				notFound = true
-				return err
+				msg := fmt.Sprintf("イベントが見つかりません: %d", r.EventId)
+				return response.NewErrorSeed(http.StatusNotFound, msg)
 			}
 			dr = &DetailResponse{Event{*e}}
 
@@ -180,8 +177,8 @@ func Detail() echo.HandlerFunc {
 		})
 		if err != nil {
 			lg.Error(err)
-			if notFound {
-				return c.JSON(http.StatusNotFound, response.Errors{})
+			if es, ok := err.(response.ErrorSeed); ok {
+				return c.JSON(es.Code, response.ErrorGen(es.Msg))
 			}
 			return c.JSON(http.StatusInternalServerError, response.Errors{})
 		}
