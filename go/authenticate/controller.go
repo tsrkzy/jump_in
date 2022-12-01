@@ -16,6 +16,7 @@ import (
 	"github.com/tsrkzy/jump_in/sess"
 	"github.com/tsrkzy/jump_in/validate"
 	"github.com/volatiletech/null/v8"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"net/http"
 	"time"
 )
@@ -243,5 +244,49 @@ func Status() echo.HandlerFunc {
 		} else {
 			return c.JSON(http.StatusOK, response.Ok())
 		}
+	}
+}
+
+func WhoAmI() echo.HandlerFunc {
+	return func(c echo.Context) error {
+
+		/* DB接続*/
+		myDB, err := database.Open()
+		if err != nil {
+			lg.Error(err)
+			return c.JSON(http.StatusInternalServerError, response.Errors{})
+		}
+
+		wr := &WhoAmIResponse{}
+
+		ctx := context.Background()
+		err = myDB.Tx(ctx, func(tx *sql.Tx) error {
+			return sess.Open(c, myDB, func(session *sessions.Session) error {
+				a, _, err := GetAccountFromChocoChip(session, ctx, tx)
+				if err != nil {
+					return err
+				}
+
+				mailAccounts, err := models.MailAccounts(qm.Where("account_id = ?", a.ID)).All(ctx, tx)
+				if err != nil {
+					return err
+				}
+				maList := make([]models.MailAccount, 0)
+				for _, ma := range mailAccounts {
+					maList = append(maList, *ma)
+				}
+
+				wr = &WhoAmIResponse{
+					Account:      *a,
+					MailAccounts: maList,
+				}
+
+				return nil
+			})
+		})
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, response.Errors{})
+		}
+		return c.JSON(http.StatusOK, wr)
 	}
 }

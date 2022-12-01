@@ -3,6 +3,7 @@ package authenticate
 import (
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/go-ozzo/ozzo-validation/is"
+	"github.com/tsrkzy/jump_in/models"
 )
 
 type Request struct {
@@ -31,4 +32,9 @@ type Result struct {
 	ChocoChip string `json:"choco_chip"`
 	MagicLink string `json:"magic_link"`
 	IpAddress string `json:"ip_address"`
+}
+
+type WhoAmIResponse struct {
+	models.Account
+	MailAccounts []models.MailAccount `json:"mail_accounts"`
 }

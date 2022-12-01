@@ -67,6 +67,7 @@ func main() {
 
 	/* ログインが必要 */
 	e.GET("/api/status", au(authenticate.Status()))
+	e.GET("/api/whoami", au(authenticate.WhoAmI()))
 	e.GET("/api/event/list", au(event.List()))
 	e.GET("/api/event/detail", au(event.Detail()))
 	e.POST("/api/event/create", au(event.Create()))
