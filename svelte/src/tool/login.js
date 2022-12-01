@@ -1,4 +1,8 @@
 import {
+  auth,
+  syncAuth
+} from "../store/auth";
+import {
   callAPI,
   callMagicLink
 } from "./callApi";
@@ -20,6 +24,7 @@ export async function login() {
       return callMagicLink(ml)
         .then(() => {
           console.log(" - authorized with magic link!");
+          return syncAuth();
         });
     })
     .catch(e => {
@@ -29,5 +34,5 @@ export async function login() {
 }
 
 export async function logout() {
-  return callAPI("/logout", "GET");
+  return callAPI("/logout", "GET").then(syncAuth);
 }
