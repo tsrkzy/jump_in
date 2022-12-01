@@ -54,80 +54,37 @@ func List() echo.HandlerFunc {
 				aId := a.ID
 
 				/* アカウントが作成した event 最大5件 */
-				eOwns, err := models.Events(
-					qm.Where("account_id = ?", aId),
-					qm.Limit(5),
-					qm.OrderBy("created_at desc"),
-				).All(ctx, tx)
+				eventOwns, err := fetchEventOwns(ctx, tx, aId, 5)
 				if err != nil {
 					return err
 				}
-
-				eventOwns := make([]Event, 0)
-				for _, e := range eOwns {
-					ee := Event{*e}
-					eventOwns = append(eventOwns, ee)
-				}
-
 				lr.EventsOwns = eventOwns
 
 				/* アカウントが join している event 最大5件 */
-				// attend
-				at, err := models.Attends(
-					qm.Where("account_id = ?", aId),
-					qm.Limit(5),
-					qm.OrderBy("created_at desc"),
-				).All(ctx, tx)
-				eIdList := make([]interface{}, 0)
-				for _, a := range at {
-					eId := a.EventID
-					eIdList = append(eIdList, int(eId))
-				}
-
-				eJoins, err := models.Events(
-					qm.WhereIn("id in ?", eIdList...),
-					qm.Limit(3),
-				).All(ctx, tx)
+				eventJoins, err := fetchEventJoins(ctx, tx, aId, 5)
 				if err != nil {
 					return err
 				}
-
-				eventJoins := make([]Event, 0)
-				for _, e := range eJoins {
-					ee := Event{*e}
-					eventJoins = append(eventJoins, ee)
-				}
-
 				lr.EventsJoins = eventJoins
 
 				/* 0 (where id in でマッチしない値) で初期化 */
 				eIdExclude := make([]interface{}, 0)
 				eIdExclude = append(eIdExclude, 0)
-				for _, e := range eOwns {
+				for _, e := range eventOwns {
 					eIdExclude = append(eIdExclude, e.ID)
 				}
-				for _, e := range eJoins {
+				for _, e := range eventJoins {
 					eIdExclude = append(eIdExclude, e.ID)
 				}
 				lg.Debug(eIdExclude)
 
 				/* 新着のイベントで、最新の最大10件 */
-				eList, err := models.Events(
-					qm.WhereNotIn("id not in ?", eIdExclude...),
-					qm.Limit(10),
-					qm.OrderBy("created_at DESC"),
-				).All(ctx, tx)
+				eventRunning, err := fetchNewEventsWithout(ctx, tx, eIdExclude)
 				if err != nil {
 					return err
 				}
 
-				eventList := make([]Event, 0)
-				for _, e := range eList {
-					ee := Event{*e}
-					eventList = append(eventList, ee)
-				}
-
-				lr.EventsRunning = eventList
+				lr.EventsRunning = eventRunning
 
 				return nil
 			})
@@ -248,5 +205,12 @@ func Create() echo.HandlerFunc {
 		res := &CreateResponse{}
 
 		return c.JSON(http.StatusOK, res)
+	}
+}
+
+func Attend() echo.HandlerFunc {
+	return func(c echo.Context) error {
+
+		return c.JSON(http.StatusOK, response.Ok())
 	}
 }
