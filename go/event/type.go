@@ -11,6 +11,7 @@ type ListRequest struct{}
 type Event struct {
 	models.Event
 }
+
 type ListResponse struct {
 	EventsOwns    []Event `json:"events_owns"`
 	EventsJoins   []Event `json:"events_joins"`
@@ -49,8 +50,14 @@ func (r DetailRequest) Validate() error {
 	)
 }
 
+type User struct {
+	models.Account
+}
+
 type DetailResponse struct {
 	Event
+	Owner   User   `json:"owner"`
+	Members []User `json:"members"`
 }
 
 type AttendRequest struct {

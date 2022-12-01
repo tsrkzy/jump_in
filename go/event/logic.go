@@ -99,3 +99,56 @@ func fetchNewEventsWithout(ctx context.Context, tx *sql.Tx, eIdExclude []interfa
 
 	return eventList, nil
 }
+
+func getOwner(ctx context.Context, tx *sql.Tx, eventId string) (User, error) {
+	e, err := models.Events(qm.Where("id = ?", eventId)).One(ctx, tx)
+	if err != nil {
+		return User{}, err
+	}
+	ownerId := e.AccountID
+	aIdList := []int64{ownerId}
+	users, err := getUsers(ctx, tx, aIdList)
+	if err != nil {
+		return User{}, err
+	}
+	owner := users[0]
+	return owner, nil
+}
+
+func getParticipants(ctx context.Context, tx *sql.Tx, eventId string) ([]User, error) {
+	attendList, err := models.Attends(qm.Where("event_id = ?", eventId)).All(ctx, tx)
+	if err != nil {
+		return nil, err
+	}
+
+	accountIdList := make([]int64, 0)
+	for _, a := range attendList {
+		accountIdList = append(accountIdList, a.AccountID)
+	}
+	users, err := getUsers(ctx, tx, accountIdList)
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
+
+func getUsers(ctx context.Context, tx *sql.Tx, accountIdList []int64) ([]User, error) {
+	aIn := make([]interface{}, 0)
+	for _, a := range accountIdList {
+		aIn = append(aIn, (interface{})(a))
+	}
+
+	aList, err := models.Accounts(qm.WhereIn("id in ?", aIn...)).All(ctx, tx)
+	if err != nil {
+		return nil, err
+	}
+
+	users := make([]User, 0)
+	for _, a := range aList {
+		u := User{*a}
+		users = append(users, u)
+	}
+
+	return users, nil
+}

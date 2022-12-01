@@ -6,6 +6,7 @@ import (
 	"github.com/tsrkzy/jump_in/authenticate"
 	"gopkg.in/resty.v1"
 	"net/http"
+	"strconv"
 	"testing"
 )
 
@@ -70,7 +71,7 @@ func TestAttend001(t *testing.T) {
 	/* 参加 */
 	cEa1 := resty.New().SetDebug(TestDebug)
 	cEa1.SetCookies(respMl.Cookies())
-	reqAtt1 := AttendRequest{EventId: int(resEc.ID)}
+	reqAtt1 := AttendRequest{EventId: strconv.Itoa(int(resEc.ID))}
 	respAtt1, err := cEa1.R().
 		SetBody(reqAtt1).
 		//SetResult(reqAtt1).
@@ -81,7 +82,7 @@ func TestAttend001(t *testing.T) {
 	/* 二重参加 */
 	cEa2 := resty.New().SetDebug(TestDebug)
 	cEa2.SetCookies(respMl.Cookies())
-	reqAtt2 := AttendRequest{EventId: int(resEc.ID)}
+	reqAtt2 := AttendRequest{EventId: strconv.Itoa(int(resEc.ID))}
 	respAtt2, err := cEa2.R().
 		SetBody(reqAtt2).
 		//SetResult(reqAtt2).
@@ -92,7 +93,7 @@ func TestAttend001(t *testing.T) {
 	/* 参加取消 */
 	cEl1 := resty.New().SetDebug(TestDebug)
 	cEl1.SetCookies(respMl.Cookies())
-	reqLe1 := AttendRequest{EventId: int(resEc.ID)}
+	reqLe1 := AttendRequest{EventId: strconv.Itoa(int(resEc.ID))}
 	respLe1, err := cEl1.R().
 		SetBody(reqLe1).
 		//SetResult(reqLe1).
@@ -103,7 +104,7 @@ func TestAttend001(t *testing.T) {
 	/* 参加二重取消 */
 	cEl2 := resty.New().SetDebug(TestDebug)
 	cEl2.SetCookies(respMl.Cookies())
-	reqLe2 := AttendRequest{EventId: int(resEc.ID)}
+	reqLe2 := AttendRequest{EventId: strconv.Itoa(int(resEc.ID))}
 	respLe2, err := cEl2.R().
 		SetBody(reqLe2).
 		//SetResult(reqLe2).

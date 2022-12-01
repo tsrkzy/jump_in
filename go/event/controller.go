@@ -126,10 +126,24 @@ func Detail() echo.HandlerFunc {
 		err = myDB.Tx(ctx, func(tx *sql.Tx) error {
 			e, err := models.Events(qm.Where("id = ?", r.EventId)).One(ctx, tx)
 			if err != nil {
-				msg := fmt.Sprintf("イベントが見つかりません: %d", r.EventId)
+				msg := fmt.Sprintf("イベントが見つかりません: %s", r.EventId)
 				return response.NewErrorSeed(http.StatusNotFound, msg)
 			}
-			dr = &DetailResponse{Event{*e}}
+
+			owner, err := getOwner(ctx, tx, r.EventId)
+			if err != nil {
+				return err
+			}
+			participants, err := getParticipants(ctx, tx, r.EventId)
+			if err != nil {
+				return err
+			}
+
+			dr = &DetailResponse{
+				Event:   Event{*e},
+				Owner:   owner,
+				Members: participants,
+			}
 
 			return nil
 		})
