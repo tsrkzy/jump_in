@@ -14,7 +14,8 @@ export async function callAPI(uri, method, data = {}) {
     "Content-Type": "application/json",
   });
   const bodyJsonStr = method === "POST" ? JSON.stringify(body) : null;
-  const queryString = stringify(query);
+  const _qs = stringify(query);
+  const queryString = _qs ? `?${_qs}` : "";
 
   const init = {
     method: method,
@@ -22,7 +23,7 @@ export async function callAPI(uri, method, data = {}) {
     body: bodyJsonStr,
     headers
   };
-  const endpoint = [`http://localhost:80/api${uri}`, queryString].join("?");
+  const endpoint = `http://localhost:80/api${uri}${queryString}`;
   return fetch(endpoint, init).then(r => r.json());
 }
 

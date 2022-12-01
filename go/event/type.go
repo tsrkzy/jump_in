@@ -2,6 +2,7 @@ package event
 
 import (
 	validation "github.com/go-ozzo/ozzo-validation"
+	"github.com/go-ozzo/ozzo-validation/is"
 	"github.com/tsrkzy/jump_in/models"
 )
 
@@ -35,7 +36,17 @@ type CreateResponse struct {
 }
 
 type DetailRequest struct {
-	EventId int `query:"event_id"`
+	EventId string `query:"event_id"`
+}
+
+func (r DetailRequest) Validate() error {
+	return validation.ValidateStruct(&r,
+		validation.Field(
+			&r.EventId,
+			validation.Required.Error("イベントIDは必須です"),
+			is.Int,
+		),
+	)
 }
 
 type DetailResponse struct {
@@ -43,9 +54,29 @@ type DetailResponse struct {
 }
 
 type AttendRequest struct {
-	EventId int `query:"event_id"`
+	EventId string `json:"event_id"`
+}
+
+func (r AttendRequest) Validate() error {
+	return validation.ValidateStruct(&r,
+		validation.Field(
+			&r.EventId,
+			validation.Required.Error("イベントIDは必須です"),
+			is.Int,
+		),
+	)
 }
 
 type LeaveRequest struct {
-	EventId int `query:"event_id"`
+	EventId string `json:"event_id"`
+}
+
+func (r LeaveRequest) Validate() error {
+	return validation.ValidateStruct(&r,
+		validation.Field(
+			&r.EventId,
+			validation.Required.Error("イベントIDは必須です"),
+			is.Int,
+		),
+	)
 }

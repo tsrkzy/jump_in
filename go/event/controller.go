@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/tsrkzy/jump_in/authenticate"
 	"github.com/tsrkzy/jump_in/database"
+	"github.com/tsrkzy/jump_in/helper"
 	"github.com/tsrkzy/jump_in/lg"
 	"github.com/tsrkzy/jump_in/models"
 	"github.com/tsrkzy/jump_in/response"
@@ -232,6 +233,12 @@ func Attend() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, response.Errors{})
 		}
 
+		/* 参加予定の event を取得 */
+		eId, err := helper.StrToID(r.EventId)
+		if err != nil {
+			return c.JSON(http.StatusNotFound, response.Errors{})
+		}
+
 		ctx := context.Background()
 		/* open DB Tx */
 		err = myDB.Tx(ctx, func(tx *sql.Tx) error {
@@ -244,8 +251,6 @@ func Attend() echo.HandlerFunc {
 				}
 				aId := a.ID
 
-				/* 参加予定の event を取得 */
-				eId := int64(r.EventId)
 				_, err = models.Events(qm.Where("id = ?", eId)).One(ctx, tx)
 				if err != nil {
 					return response.NewErrorSeed(http.StatusNotFound, fmt.Sprintf("イベントが存在しません: %d", eId))
@@ -296,6 +301,11 @@ func Leave() echo.HandlerFunc {
 			vErr := validate.ErrorIntoJson(err)
 			return c.JSON(http.StatusBadRequest, vErr)
 		}
+		/* 参加取消予定の event を取得 */
+		eId, err := helper.StrToID(r.EventId)
+		if err != nil {
+			return c.JSON(http.StatusNotFound, response.Errors{})
+		}
 
 		/* db接続 */
 		myDB, err := database.Open()
@@ -317,7 +327,6 @@ func Leave() echo.HandlerFunc {
 				aId := a.ID
 
 				/* 参加取り消し予定の event を取得 */
-				eId := int64(r.EventId)
 				_, err = models.Events(qm.Where("id = ?", eId)).One(ctx, tx)
 				if err != nil {
 					return response.NewErrorSeed(http.StatusNotFound, fmt.Sprintf("イベントが存在しません: %d", eId))
