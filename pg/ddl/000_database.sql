@@ -83,7 +83,8 @@ create table "attend" (
     "event_id"   bigserial                not null
         references "event"("id") on delete cascade,
     "created_at" timestamp with time zone not null default now(),
-    "updated_at" timestamp with time zone not null default now()
+    "updated_at" timestamp with time zone not null default now(),
+    unique ("account_id", "event_id")
 );
 
 drop table if exists "wish_date" cascade;

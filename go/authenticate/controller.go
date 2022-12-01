@@ -114,8 +114,6 @@ func Authenticate() echo.HandlerFunc {
 			if es, ok := err.(response.ErrorSeed); ok {
 				return c.JSON(es.Code, response.ErrorGen(es.Msg))
 			}
-
-			lg.Error(err)
 			return c.JSON(http.StatusInternalServerError, response.Errors{})
 		}
 

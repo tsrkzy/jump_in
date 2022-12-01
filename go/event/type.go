@@ -31,6 +31,7 @@ func (r CreateRequest) Validate() error {
 }
 
 type CreateResponse struct {
+	Event
 }
 
 type DetailRequest struct {
@@ -39,4 +40,12 @@ type DetailRequest struct {
 
 type DetailResponse struct {
 	Event
+}
+
+type AttendRequest struct {
+	EventId int `query:"event_id"`
+}
+
+type LeaveRequest struct {
+	EventId int `query:"event_id"`
 }

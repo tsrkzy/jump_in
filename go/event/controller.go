@@ -166,6 +166,8 @@ func Create() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, response.Errors{})
 		}
 
+		res := &CreateResponse{}
+
 		ctx := context.Background()
 		/* open DB Tx */
 		err = myDB.Tx(ctx, func(tx *sql.Tx) error {
@@ -194,6 +196,8 @@ func Create() echo.HandlerFunc {
 					return err
 				}
 
+				res = &CreateResponse{Event{*e}}
+
 				return nil
 			})
 		})
@@ -202,14 +206,148 @@ func Create() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, response.Errors{})
 		}
 
-		res := &CreateResponse{}
-
 		return c.JSON(http.StatusOK, res)
 	}
 }
 
 func Attend() echo.HandlerFunc {
 	return func(c echo.Context) error {
+		r := &AttendRequest{}
+		err := c.Bind(r)
+		if err != nil {
+			lg.Error(err)
+			return c.JSON(http.StatusBadRequest, response.Errors{})
+		}
+
+		/* validation */
+		if err := c.Validate(r); err != nil {
+			vErr := validate.ErrorIntoJson(err)
+			return c.JSON(http.StatusBadRequest, vErr)
+		}
+
+		/* db接続 */
+		myDB, err := database.Open()
+		if err != nil {
+			lg.Error(err)
+			return c.JSON(http.StatusInternalServerError, response.Errors{})
+		}
+
+		ctx := context.Background()
+		/* open DB Tx */
+		err = myDB.Tx(ctx, func(tx *sql.Tx) error {
+			return sess.Open(c, myDB, func(session *sessions.Session) error {
+
+				/* セッションからアカウントIDを取得 */
+				a, _, err := authenticate.GetAccountFromChocoChip(session, ctx, tx)
+				if err != nil {
+					return err
+				}
+				aId := a.ID
+
+				/* 参加予定の event を取得 */
+				eId := int64(r.EventId)
+				_, err = models.Events(qm.Where("id = ?", eId)).One(ctx, tx)
+				if err != nil {
+					return response.NewErrorSeed(http.StatusNotFound, fmt.Sprintf("イベントが存在しません: %d", eId))
+				}
+
+				/* Attend から参加状況を取得 */
+				exA, err := models.Attends(qm.Where("event_id = ? and account_id = ?", eId, aId)).Exists(ctx, tx)
+				if err != nil {
+					return err
+				}
+
+				if exA {
+					/* 既に参加済み */
+					return nil
+				}
+
+				/* Attend を作成 */
+				att := models.Attend{
+					AccountID: aId,
+					EventID:   eId,
+				}
+
+				return att.Insert(ctx, tx, boil.Infer())
+			})
+		})
+		if err != nil {
+			if es, ok := err.(response.ErrorSeed); ok {
+				return c.JSON(es.Code, es.Msg)
+			}
+			return c.JSON(http.StatusInternalServerError, response.Errors{})
+		}
+
+		return c.JSON(http.StatusOK, response.Ok())
+	}
+}
+
+func Leave() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		r := &LeaveRequest{}
+		err := c.Bind(r)
+		if err != nil {
+			lg.Error(err)
+			return c.JSON(http.StatusBadRequest, response.Errors{})
+		}
+
+		/* validation */
+		if err := c.Validate(r); err != nil {
+			vErr := validate.ErrorIntoJson(err)
+			return c.JSON(http.StatusBadRequest, vErr)
+		}
+
+		/* db接続 */
+		myDB, err := database.Open()
+		if err != nil {
+			lg.Error(err)
+			return c.JSON(http.StatusInternalServerError, response.Errors{})
+		}
+
+		ctx := context.Background()
+		/* open DB Tx */
+		err = myDB.Tx(ctx, func(tx *sql.Tx) error {
+			return sess.Open(c, myDB, func(session *sessions.Session) error {
+
+				/* セッションからアカウントIDを取得 */
+				a, _, err := authenticate.GetAccountFromChocoChip(session, ctx, tx)
+				if err != nil {
+					return err
+				}
+				aId := a.ID
+
+				/* 参加取り消し予定の event を取得 */
+				eId := int64(r.EventId)
+				_, err = models.Events(qm.Where("id = ?", eId)).One(ctx, tx)
+				if err != nil {
+					return response.NewErrorSeed(http.StatusNotFound, fmt.Sprintf("イベントが存在しません: %d", eId))
+				}
+
+				/* Attend から参加状況を取得 */
+				exA, err := models.Attends(qm.Where("event_id = ? and account_id = ?", eId, aId)).Exists(ctx, tx)
+				if err != nil {
+					return err
+				}
+
+				if !exA {
+					/* 存在しない == 参加していないなら終了 */
+					return nil
+				}
+
+				_, err = models.Attends(qm.Where("event_id = ? and account_id = ?", eId, aId)).DeleteAll(ctx, tx)
+				if err != nil {
+					return err
+				}
+
+				return nil
+			})
+		})
+		if err != nil {
+			if es, ok := err.(response.ErrorSeed); ok {
+				return c.JSON(es.Code, es.Msg)
+			}
+			return c.JSON(http.StatusInternalServerError, response.Errors{})
+		}
 
 		return c.JSON(http.StatusOK, response.Ok())
 	}

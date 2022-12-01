@@ -71,6 +71,7 @@ func main() {
 	e.GET("/api/event/detail", au(event.Detail()))
 	e.POST("/api/event/create", au(event.Create()))
 	e.POST("/api/event/attend", au(event.Attend()))
+	e.POST("/api/event/leave", au(event.Leave()))
 
 	/* start listening */
 	if err := e.Start(":" + port); err != http.ErrServerClosed {
