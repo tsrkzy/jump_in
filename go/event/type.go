@@ -56,8 +56,8 @@ type User struct {
 
 type DetailResponse struct {
 	Event
-	Owner   User   `json:"owner"`
-	Members []User `json:"members"`
+	Owner        User   `json:"owner"`
+	Participants []User `json:"participants"`
 }
 
 type AttendRequest struct {

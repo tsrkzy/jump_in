@@ -16,7 +16,14 @@
   import LeaveButton from "../../../component/LeaveButton.svelte";
 
   export let event_id = "";
-  let e = {};
+  let e = {
+    name: "",
+    accountId: "",
+    eventGroupId: "",
+    createdAt: "",
+    owner: {},
+    participants: [],
+  };
   callAPI(`/event/detail`, "GET", { query: { event_id } })
     .then(r => {
       e = {
@@ -24,16 +31,30 @@
         accountId: r.account_id,
         eventGroupId: r.event_group_id,
         createdAt: r.created_at,
+        owner: r.owner,
+        participants: r.participants
       };
     });
 </script>
 
 <div>
   <h1>event: {event_id}</h1>
-  <h2>"e.name":{e.name}</h2>
-  <p>"e.accountId":{e.accountId}</p>
-  <p>"e.eventGroupId":{e.eventGroupId}</p>
-  <p>"e.createdAt":{e.createdAt}</p>
+  <pre>
+"e.name":{e.name}
+    "e.accountId":{e.accountId}
+    "e.eventGroupId":{e.eventGroupId}
+    "e.createdAt":{e.createdAt}
+  </pre>
+  <pre>
+"e.owner.id": {e.owner.id}
+    "e.owner.name": {e.owner.name}
+  </pre>
+  {#each e.participants as p }
+    <pre>
+"p:id": {p.id}
+      "p:name": {p.name}
+    </pre>
+  {/each}
   <AttendButton event_id={event_id}></AttendButton>
   <LeaveButton event_id={event_id}></LeaveButton>
 </div>

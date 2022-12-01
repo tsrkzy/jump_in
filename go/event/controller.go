@@ -140,9 +140,9 @@ func Detail() echo.HandlerFunc {
 			}
 
 			dr = &DetailResponse{
-				Event:   Event{*e},
-				Owner:   owner,
-				Members: participants,
+				Event:        Event{*e},
+				Owner:        owner,
+				Participants: participants,
 			}
 
 			return nil
