@@ -1,17 +1,15 @@
 import {
-  auth,
   syncAuth
 } from "../store/auth";
 import {
   callAPI,
-  callMagicLink
 } from "./callApi";
 
 export const EMAIL_FOR_DEV = "tsrmix+jump_in@gmail.com";
 
 /**
  * マジックリンクメール送信APIの開発用レスポンスからマジックリンクを取得
- * マジックリンクを叩いてセッションクッキーを取得
+ * マジックリンクへ遷移してログイン完了
  * ログイン状態になる
  */
 export async function login() {
@@ -20,12 +18,9 @@ export async function login() {
     .then(v => {
       const { magic_link: ml } = v;
       console.log(` - magic link: ${ml}`);
-
-      return callMagicLink(ml)
-        .then(() => {
-          console.log(" - authorized with magic link!");
-          return syncAuth();
-        });
+      setTimeout(() => {
+        window.location.href = ml;
+      }, 1000);
     })
     .catch(e => {
         console.error(e);
