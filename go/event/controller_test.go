@@ -6,7 +6,6 @@ import (
 	"github.com/tsrkzy/jump_in/authenticate"
 	"gopkg.in/resty.v1"
 	"net/http"
-	"strconv"
 	"testing"
 )
 
@@ -15,13 +14,15 @@ const DEFAULT_EMAIL = "tsrmix+echo@gmail.com"
 
 func TestCreate001(t *testing.T) {
 
-	respMl1, err := Login(t, DEFAULT_EMAIL)
+	respMl1, w, err := Login(t, DEFAULT_EMAIL)
+	accountId := fmt.Sprintf("%d", w.ID)
 	assert.NoError(t, err)
 
 	cEc := resty.New().SetDebug(TestDebug)
 	cEc.SetCookies(respMl1.Cookies())
 	reqEc := CreateRequest{
-		Name: "テスト用イベント名",
+		Name:      "テスト用イベント名",
+		AccountId: accountId,
 	}
 	resEc := CreateResponse{}
 	respEc, err := cEc.R().
@@ -35,6 +36,9 @@ func TestCreate001(t *testing.T) {
 	cEl.SetCookies(respMl1.Cookies())
 	resEl := ListResponse{}
 	respEl, err := cEl.R().
+		SetQueryParams(map[string]string{
+			"account_id": accountId,
+		}).
 		SetResult(&resEl).
 		Get("http://localhost:80/api/event/list")
 	assert.NoError(t, err)
@@ -52,13 +56,15 @@ func TestCreate001(t *testing.T) {
 }
 
 func TestAttend001(t *testing.T) {
-	respMl, err := Login(t, DEFAULT_EMAIL)
+	respMl, w, err := Login(t, DEFAULT_EMAIL)
+	accountId := fmt.Sprintf("%d", w.ID)
 	assert.NoError(t, err)
 
 	cEc := resty.New().SetDebug(TestDebug)
 	cEc.SetCookies(respMl.Cookies())
 	reqEc := CreateRequest{
-		Name: "Attendテスト用イベント名",
+		Name:      "Attendテスト用イベント名",
+		AccountId: accountId,
 	}
 	resEc := CreateResponse{}
 	respEc, err := cEc.R().
@@ -68,10 +74,12 @@ func TestAttend001(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, respEc.StatusCode())
 
+	eventId := fmt.Sprintf("%d", resEc.ID)
+
 	/* 参加 */
 	cEa1 := resty.New().SetDebug(TestDebug)
 	cEa1.SetCookies(respMl.Cookies())
-	reqAtt1 := AttendRequest{EventId: strconv.Itoa(int(resEc.ID))}
+	reqAtt1 := AttendRequest{EventId: eventId, AccountId: accountId}
 	respAtt1, err := cEa1.R().
 		SetBody(reqAtt1).
 		//SetResult(reqAtt1).
@@ -82,7 +90,7 @@ func TestAttend001(t *testing.T) {
 	/* 二重参加 */
 	cEa2 := resty.New().SetDebug(TestDebug)
 	cEa2.SetCookies(respMl.Cookies())
-	reqAtt2 := AttendRequest{EventId: strconv.Itoa(int(resEc.ID))}
+	reqAtt2 := AttendRequest{EventId: eventId, AccountId: accountId}
 	respAtt2, err := cEa2.R().
 		SetBody(reqAtt2).
 		//SetResult(reqAtt2).
@@ -93,7 +101,7 @@ func TestAttend001(t *testing.T) {
 	/* 参加取消 */
 	cEl1 := resty.New().SetDebug(TestDebug)
 	cEl1.SetCookies(respMl.Cookies())
-	reqLe1 := AttendRequest{EventId: strconv.Itoa(int(resEc.ID))}
+	reqLe1 := AttendRequest{EventId: eventId, AccountId: accountId}
 	respLe1, err := cEl1.R().
 		SetBody(reqLe1).
 		//SetResult(reqLe1).
@@ -104,7 +112,7 @@ func TestAttend001(t *testing.T) {
 	/* 参加二重取消 */
 	cEl2 := resty.New().SetDebug(TestDebug)
 	cEl2.SetCookies(respMl.Cookies())
-	reqLe2 := AttendRequest{EventId: strconv.Itoa(int(resEc.ID))}
+	reqLe2 := AttendRequest{EventId: eventId, AccountId: accountId}
 	respLe2, err := cEl2.R().
 		SetBody(reqLe2).
 		//SetResult(reqLe2).
@@ -114,10 +122,10 @@ func TestAttend001(t *testing.T) {
 
 }
 
-func Login(t *testing.T, email string) (*resty.Response, error) {
+func Login(t *testing.T, email string) (*resty.Response, authenticate.WhoAmIResponse, error) {
 	redirectUri := "http://localhost:80/api/status"
 	r := authenticate.Request{
-		Email:       email,
+		MailAddress: email,
 		RedirectURI: redirectUri,
 	}
 	/* ML取得、hrefへリダイレクトさせる設定 */
@@ -138,5 +146,14 @@ func Login(t *testing.T, email string) (*resty.Response, error) {
 		Get(authResult.MagicLink)
 	assert.NoError(t, err)
 
-	return respMl1, err
+	cW := resty.New().SetDebug(TestDebug)
+	cW.SetCookies(respMl1.Cookies())
+	cR := authenticate.WhoAmIResponse{}
+	respW, err := cW.R().
+		SetResult(&cR).
+		Get("http://localhost:80/api/whoami")
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, respW.StatusCode())
+
+	return respMl1, cR, err
 }

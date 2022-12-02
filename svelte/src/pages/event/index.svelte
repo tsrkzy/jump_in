@@ -2,14 +2,23 @@
   import Anchor from "../../component/Anchor.svelte";
   import LoginButton from "../../component/LoginButton.svelte";
   import LogoffButton from "../../component/LogoffButton.svelte";
-  import { syncAuth } from "../../store/auth";
+  import {
+    auth,
+    syncAuth
+  } from "../../store/auth";
   import { callAPI } from "../../tool/callApi";
 
+  let account_id = 0;
   let eventsOwns = [];
   let eventsJoins = [];
   let eventsRunning = [];
-  syncAuth().then(() => {
-    return callAPI("/event/list")
+
+  syncAuth();
+
+  auth.subscribe(a => {
+    account_id = a.accountId;
+
+    return callAPI("/event/list", "GET", { query: { account_id } })
       .then(r => {
         const {
           events_owns = [],
@@ -21,6 +30,7 @@
         eventsRunning = events_running;
       });
   });
+
 </script>
 
 <div>

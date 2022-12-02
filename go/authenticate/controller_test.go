@@ -17,7 +17,7 @@ func TestAuthenticate000(t *testing.T) {
 	email := "tsrmix+echogmail.com"
 	redirectUri := "http:/localhost:80/api/status"
 	r := Request{
-		Email:       email,
+		MailAddress: email,
 		RedirectURI: redirectUri,
 	}
 
@@ -57,7 +57,7 @@ func TestAuthenticate001(t *testing.T) {
 	email := "tsrmix+echo@gmail.com"
 	redirectUri := "http://localhost:80/api/status"
 	r := Request{
-		Email:       email,
+		MailAddress: email,
 		RedirectURI: redirectUri,
 	}
 	/* ML取得、hrefへリダイレクトさせる設定 */
@@ -109,7 +109,7 @@ func TestAuthenticate002(t *testing.T) {
 	email := "tsrmix+echo@gmail.com"
 	redirectUri := "http://localhost:80/api/status"
 	r := Request{
-		Email:       email,
+		MailAddress: email,
 		RedirectURI: redirectUri,
 	}
 	/* ML取得 */
@@ -144,7 +144,7 @@ func TestAuthenticate003(t *testing.T) {
 	email := "tsrmix+echo@gmail.com"
 	redirectUri := "http://localhost:80/api/status"
 	r := Request{
-		Email:       email,
+		MailAddress: email,
 		RedirectURI: redirectUri,
 	}
 

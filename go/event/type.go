@@ -6,7 +6,17 @@ import (
 	"github.com/tsrkzy/jump_in/models"
 )
 
-type ListRequest struct{}
+type ListRequest struct {
+	AccountId string `query:"account_id"`
+}
+
+func (r ListRequest) Validate() error {
+	return validation.ValidateStruct(&r,
+		validation.Field(
+			&r.AccountId,
+			validation.Required.Error("アカウントIDは必須です"),
+		))
+}
 
 type Event struct {
 	models.Event
@@ -19,7 +29,8 @@ type ListResponse struct {
 }
 
 type CreateRequest struct {
-	Name string
+	Name      string
+	AccountId string `json:"account_id"`
 }
 
 func (r CreateRequest) Validate() error {
@@ -28,6 +39,10 @@ func (r CreateRequest) Validate() error {
 			&r.Name,
 			validation.Required.Error("イベント名は必須です"),
 			validation.RuneLength(5, 40).Error("イベント名は5〜40文字で指定してください"),
+		),
+		validation.Field(
+			&r.AccountId,
+			validation.Required.Error("アカウントIDは必須です"),
 		),
 	)
 }
@@ -61,7 +76,8 @@ type DetailResponse struct {
 }
 
 type AttendRequest struct {
-	EventId string `json:"event_id"`
+	EventId   string `json:"event_id"`
+	AccountId string `json:"account_id"`
 }
 
 func (r AttendRequest) Validate() error {
@@ -70,12 +86,16 @@ func (r AttendRequest) Validate() error {
 			&r.EventId,
 			validation.Required.Error("イベントIDは必須です"),
 			is.Int,
+		), validation.Field(
+			&r.AccountId,
+			validation.Required.Error("アカウントIDは必須です"),
 		),
 	)
 }
 
 type LeaveRequest struct {
-	EventId string `json:"event_id"`
+	EventId   string `json:"event_id"`
+	AccountId string `json:"account_id"`
 }
 
 func (r LeaveRequest) Validate() error {
@@ -84,6 +104,9 @@ func (r LeaveRequest) Validate() error {
 			&r.EventId,
 			validation.Required.Error("イベントIDは必須です"),
 			is.Int,
+		), validation.Field(
+			&r.AccountId,
+			validation.Required.Error("アカウントIDは必須です"),
 		),
 	)
 }

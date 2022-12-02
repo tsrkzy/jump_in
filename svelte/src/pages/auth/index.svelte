@@ -7,9 +7,9 @@
 
   function requestMagicLink() {
     console.log("index.requestMagicLink");
-    const email = mailAddress;
+    const mail_address = mailAddress;
     const redirect_uri = window.location.href;
-    const body = { email, redirect_uri };
+    const body = { mail_address, redirect_uri };
     const data = { body };
     callAPI("/authenticate", "POST", data);
   }

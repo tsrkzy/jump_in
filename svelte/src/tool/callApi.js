@@ -8,7 +8,7 @@ import { stringify } from "qs";
  * @param {{body?: Object,query?: Object, isUri?: boolean }} data - オブジェクトでquery: query param, body: post body用のデータを渡すといい感じにする
  * @returns {Promise<Object>}
  */
-export async function callAPI(uri, method, data = {}) {
+export async function callAPI(uri, method = "GET", data = {}) {
   const { body = {}, query = {} } = data;
   const headers = new Headers({
     "Content-Type": "application/json",
@@ -25,12 +25,4 @@ export async function callAPI(uri, method, data = {}) {
   };
   const endpoint = `http://localhost:80/api${uri}${queryString}`;
   return fetch(endpoint, init).then(r => r.json());
-}
-
-export async function callMagicLink(uri) {
-  const init = {
-    method: "GET",
-    mode: "cors",
-  };
-  return fetch(uri, init);
 }

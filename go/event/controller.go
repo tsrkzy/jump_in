@@ -29,6 +29,11 @@ func List() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, response.Errors{})
 		}
 
+		accountId, err := helper.StrToID(r.AccountId)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, response.Errors{})
+		}
+
 		/* validation */
 		if err := c.Validate(r); err != nil {
 			vErr := validate.ErrorIntoJson(err)
@@ -52,6 +57,12 @@ func List() echo.HandlerFunc {
 				if err != nil {
 					return err
 				}
+
+				/* 認証先とリクエストのアカウントIDが異なったらNG */
+				if a.ID != accountId {
+					return response.NewErrorSeed(http.StatusUnauthorized, "認証に失敗しました")
+				}
+
 				aId := a.ID
 
 				/* アカウントが作成した event 最大5件 */
@@ -168,6 +179,11 @@ func Create() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, response.Errors{})
 		}
 
+		accountId, err := helper.StrToID(r.AccountId)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, response.Errors{})
+		}
+
 		/* validation */
 		if err := c.Validate(r); err != nil {
 			vErr := validate.ErrorIntoJson(err)
@@ -187,16 +203,20 @@ func Create() echo.HandlerFunc {
 		/* open DB Tx */
 		err = myDB.Tx(ctx, func(tx *sql.Tx) error {
 			return sess.Open(c, myDB, func(s *sessions.Session) error {
-
-				/* event_group が存在しなければ作成しておく */
-				eName := r.Name
-				eg, err := createEventGroup(ctx, tx, eName)
+				/* セッションストアからアカウントIDを逆引き */
+				a, _, err := authenticate.GetAccountFromChocoChip(s, ctx, tx)
 				if err != nil {
 					return err
 				}
 
-				/* セッションストアからアカウントIDを逆引き */
-				a, _, err := authenticate.GetAccountFromChocoChip(s, ctx, tx)
+				/* 認証先とリクエストのアカウントIDが異なったらNG */
+				if a.ID != accountId {
+					return response.NewErrorSeed(http.StatusUnauthorized, "認証に失敗しました")
+				}
+
+				/* event_group が存在しなければ作成しておく */
+				eName := r.Name
+				eg, err := createEventGroup(ctx, tx, eName)
 				if err != nil {
 					return err
 				}

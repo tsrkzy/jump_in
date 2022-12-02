@@ -13,7 +13,7 @@ export const EMAIL_FOR_DEV = "tsrmix+jump_in@gmail.com";
  * ログイン状態になる
  */
 export async function login() {
-  const body = { email: EMAIL_FOR_DEV, redirect_uri: window.location.href };
+  const body = { mail_address: EMAIL_FOR_DEV, redirect_uri: window.location.href };
   return callAPI("/authenticate", "POST", { body })
     .then(v => {
       const { magic_link: ml } = v;

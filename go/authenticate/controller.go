@@ -56,7 +56,7 @@ func Authenticate() echo.HandlerFunc {
 				}
 
 				/* スロットル: 同じメールアドレスについて、10分に3回まで */
-				if err := ThrottleLimitCheck(&ctx, tx, r.Email); err != nil {
+				if err := ThrottleLimitCheck(&ctx, tx, r.MailAddress); err != nil {
 					return response.NewErrorSeed(http.StatusTooManyRequests, "時間を置いて再度リクエストしてください")
 				}
 
@@ -81,14 +81,14 @@ func Authenticate() echo.HandlerFunc {
 					ExpiredDatetime:    time.Now().Add(3 * time.Hour),
 					AuthorisedDatetime: null.Time{},
 				}
-				if err := CreateInvitation(&ctx, tx, &invitation, r.Email); err != nil {
+				if err := CreateInvitation(&ctx, tx, &invitation, r.MailAddress); err != nil {
 					return err
 				}
 
 				/* メール送信 */
 				ml := "http://localhost:80/api/ml/" + uriHash
 				m := mail.Content{
-					MailTo:  r.Email,
+					MailTo:  r.MailAddress,
 					NameTo:  "宛先@TODO",
 					Subject: "Invitation Link",
 					Body:    ml,
@@ -98,7 +98,7 @@ func Authenticate() echo.HandlerFunc {
 				}
 
 				/* response */
-				ar.Email = r.Email
+				ar.MailAddress = r.MailAddress
 				ar.URIHash = uriHash
 				ar.ChocoChip = chocoChip
 				ar.MagicLink = ml
