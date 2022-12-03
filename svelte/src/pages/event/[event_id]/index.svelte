@@ -11,6 +11,7 @@
 </script>
 
 <script>
+  import { syncAuth } from "../../../store/auth";
   import { callAPI } from "../../../tool/callApi";
   import AttendButton from "../../../component/AttendButton.svelte";
   import LeaveButton from "../../../component/LeaveButton.svelte";
@@ -24,17 +25,19 @@
     owner: {},
     participants: [],
   };
-  callAPI(`/event/detail`, "GET", { query: { event_id } })
-    .then(r => {
-      e = {
-        name: r.name,
-        accountId: r.account_id,
-        eventGroupId: r.event_group_id,
-        createdAt: r.created_at,
-        owner: r.owner,
-        participants: r.participants
-      };
-    });
+  syncAuth().then(() => {
+    return callAPI(`/event/detail`, "GET", { query: { event_id } })
+      .then(r => {
+        e = {
+          name: r.name,
+          accountId: r.account_id,
+          eventGroupId: r.event_group_id,
+          createdAt: r.created_at,
+          owner: r.owner,
+          participants: r.participants
+        };
+      });
+  });
 </script>
 
 <div>

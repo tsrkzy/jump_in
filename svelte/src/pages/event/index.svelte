@@ -4,7 +4,7 @@
   import LogoffButton from "../../component/LogoffButton.svelte";
   import {
     auth,
-    syncAuth
+    syncAuth,
   } from "../../store/auth";
   import { callAPI } from "../../tool/callApi";
 
@@ -13,29 +13,29 @@
   let eventsJoins = [];
   let eventsRunning = [];
 
-  syncAuth();
+  syncAuth().then(() => {
+    auth.subscribe(a => {
+      account_id = a.accountId;
 
-  auth.subscribe(a => {
-    account_id = a.accountId;
-
-    return callAPI("/event/list", "GET", { query: { account_id } })
-      .then(r => {
-        const {
-          events_owns = [],
-          events_joins = [],
-          events_running = []
-        } = r;
-        eventsOwns = events_owns;
-        eventsJoins = events_joins;
-        eventsRunning = events_running;
-      });
+      return callAPI("/event/list", "GET", { query: { account_id } })
+        .then(r => {
+          const {
+            events_owns = [],
+            events_joins = [],
+            events_running = []
+          } = r;
+          eventsOwns = events_owns;
+          eventsJoins = events_joins;
+          eventsRunning = events_running;
+        });
+    });
   });
-
 </script>
 
 <div>
   <LogoffButton></LogoffButton>
   <LoginButton></LoginButton>
+  <Anchor href="/auth" label="auth"></Anchor>
   <Anchor href="/event/new" label="new event"></Anchor>
   <h1>event</h1>
   <h2>my event</h2>

@@ -8,6 +8,11 @@
 
   let eventName = "イベント名";
 
+  /* 認証情報がJSに入っていない(非同期)ので、ログイン検査は画面表示直後に行えない */
+
+  /* やるなら、callAPIの401を無効化して */
+  /* /event/create が401だったら認証を促す */
+
   async function onClickCreateEvent() {
     console.log("index.onClickCreateEvent");
     const body = { name: eventName };

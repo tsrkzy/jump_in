@@ -9,6 +9,7 @@ import { stringify } from "qs";
  * @returns {Promise<Object>}
  */
 export async function callAPI(uri, method = "GET", data = {}) {
+  console.log("callApi.callAPI", uri);
   const { body = {}, query = {} } = data;
   const headers = new Headers({
     "Content-Type": "application/json",
@@ -24,5 +25,21 @@ export async function callAPI(uri, method = "GET", data = {}) {
     headers
   };
   const endpoint = `http://localhost:80/api${uri}${queryString}`;
-  return fetch(endpoint, init).then(r => r.json());
+  return fetch(endpoint, init).then(r => {
+      console.log(r.ok, r.status); // @DELETEME
+      if (r.ok) {
+        /* サーバから2XXで応答があった */
+        return r.json();
+      } else if (r.status === 401) {
+        /* @TODO */
+        // 「無効な認証情報: ログインページに移動します」
+        const msg = "無効な認証情報: ログインページに移動します";
+        console.error(msg);
+        location.href = "/auth";
+        throw new Error(r.statusText);
+      } else {
+        throw new Error(r.statusText);
+      }
+    }
+  );
 }
