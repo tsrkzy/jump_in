@@ -53,15 +53,14 @@ func formatLTSV() string {
 }
 
 func formatter() string {
-	lines := []string{
-		"================================================================================",
-		"${method} ${host}${uri}",
-		" - ${status}",
-		" - size:${bytes_out}",
-		" - reqtime_human:${latency_human}",
-		" - referer:${referer}",
-		" - ua:${user_agent}",
-	}
-	format := strings.Join(lines, "\n") + "\n"
-	return format
+	return `
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+${method} ${host}${uri}
+ - ${status}
+ - size:${bytes_out}
+ - reqtime_human:${latency_human}
+ - referer:${referer}
+ - ua:${user_agent}
+================================================================================
+`
 }

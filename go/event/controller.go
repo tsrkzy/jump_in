@@ -131,32 +131,13 @@ func Detail() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, response.Errors{})
 		}
 
-		dr := &DetailResponse{}
+		var dr *DetailResponse
 
+		/* 詳細作成 */
 		ctx := context.Background()
 		err = myDB.Tx(ctx, func(tx *sql.Tx) error {
-			e, err := models.Events(qm.Where("id = ?", r.EventId)).One(ctx, tx)
-			if err != nil {
-				msg := fmt.Sprintf("イベントが見つかりません: %s", r.EventId)
-				return response.NewErrorSeed(http.StatusNotFound, msg)
-			}
-
-			owner, err := getOwner(ctx, tx, r.EventId)
-			if err != nil {
-				return err
-			}
-			participants, err := getParticipants(ctx, tx, r.EventId)
-			if err != nil {
-				return err
-			}
-
-			dr = &DetailResponse{
-				Event:        Event{*e},
-				Owner:        owner,
-				Participants: participants,
-			}
-
-			return nil
+			dr, err = getDetail(ctx, tx, r.EventId)
+			return err
 		})
 		if err != nil {
 			lg.Error(err)
@@ -168,6 +149,31 @@ func Detail() echo.HandlerFunc {
 
 		return c.JSON(http.StatusOK, dr)
 	}
+}
+
+func getDetail(ctx context.Context, tx *sql.Tx, eventId string) (*DetailResponse, error) {
+	e, err := models.Events(qm.Where("id = ?", eventId)).One(ctx, tx)
+	if err != nil {
+		msg := fmt.Sprintf("イベントが見つかりません: %s", eventId)
+		return nil, response.NewErrorSeed(http.StatusNotFound, msg)
+	}
+
+	owner, err := getOwner(ctx, tx, eventId)
+	if err != nil {
+		return nil, err
+	}
+	participants, err := getParticipants(ctx, tx, eventId)
+	if err != nil {
+		return nil, err
+	}
+
+	dr := &DetailResponse{
+		Event:        Event{*e},
+		Owner:        owner,
+		Participants: participants,
+	}
+
+	return dr, nil
 }
 
 func Create() echo.HandlerFunc {
@@ -272,6 +278,7 @@ func Attend() echo.HandlerFunc {
 		if err != nil {
 			return c.JSON(http.StatusNotFound, response.Errors{})
 		}
+		dr := &DetailResponse{}
 
 		ctx := context.Background()
 		/* open DB Tx */
@@ -307,7 +314,15 @@ func Attend() echo.HandlerFunc {
 					EventID:   eId,
 				}
 
-				return att.Insert(ctx, tx, boil.Infer())
+				err = att.Insert(ctx, tx, boil.Infer())
+				if err != nil {
+					return err
+				}
+
+				/* 詳細作成 */
+				dr, err = getDetail(ctx, tx, r.EventId)
+
+				return err
 			})
 		})
 		if err != nil {
@@ -317,7 +332,9 @@ func Attend() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, response.Errors{})
 		}
 
-		return c.JSON(http.StatusOK, response.Ok())
+		ar := AttendResponse{*dr}
+
+		return c.JSON(http.StatusOK, ar)
 	}
 }
 

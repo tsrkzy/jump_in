@@ -93,6 +93,10 @@ func (r AttendRequest) Validate() error {
 	)
 }
 
+type AttendResponse struct {
+	DetailResponse
+}
+
 type LeaveRequest struct {
 	EventId   string `json:"event_id"`
 	AccountId string `json:"account_id"`
@@ -109,4 +113,8 @@ func (r LeaveRequest) Validate() error {
 			validation.Required.Error("アカウントIDは必須です"),
 		),
 	)
+}
+
+type LeaveResponse struct {
+	DetailResponse
 }
