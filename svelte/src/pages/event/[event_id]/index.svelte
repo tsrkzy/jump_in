@@ -27,21 +27,11 @@
   };
   syncAuth().then(() => {
     return callAPI(`/event/detail`, "GET", { query: { event_id } })
-      .then(r => {
-        e = {
-          name: r.name,
-          accountId: r.account_id,
-          eventGroupId: r.event_group_id,
-          createdAt: r.created_at,
-          owner: r.owner,
-          participants: r.participants
-        };
-      });
   });
 </script>
 
 <div>
-  <h1>event: {event_id}</h1>
+  <h3>event: {event_id}</h3>
   <pre>
 "e.name":{e.name}
     "e.accountId":{e.accountId}

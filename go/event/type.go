@@ -29,7 +29,7 @@ type ListResponse struct {
 }
 
 type CreateRequest struct {
-	Name      string
+	Name      string `json:"name"`
 	AccountId string `json:"account_id"`
 }
 

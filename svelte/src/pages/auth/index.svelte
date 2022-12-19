@@ -3,18 +3,18 @@
   import LoginButton from "../../component/LoginButton.svelte";
   import LogoffButton from "../../component/LogoffButton.svelte";
   import {
-    auth,
+    getSAuth,
     syncAuth,
   } from "../../store/auth";
   import { callAPI } from "../../tool/callApi";
 
   let accountName = "";
   let mailAddress = "";
-  syncAuth();
-  auth.subscribe(a => {
-    accountName = a.accountName;
-
-  });
+  syncAuth()
+    .then(() => {
+      const a = getSAuth();
+      accountName = a.accountName;
+    });
 
   function requestMagicLink() {
     console.log("index.requestMagicLink");

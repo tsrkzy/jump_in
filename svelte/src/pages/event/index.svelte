@@ -2,20 +2,17 @@
   import Anchor from "../../component/Anchor.svelte";
   import LoginButton from "../../component/LoginButton.svelte";
   import LogoffButton from "../../component/LogoffButton.svelte";
-  import {
-    auth,
-    syncAuth,
-  } from "../../store/auth";
+  import { syncAuth } from "../../store/auth";
   import { callAPI } from "../../tool/callApi";
+  import { getAccountID } from "../../tool/storage";
 
-  let account_id = 0;
   let eventsOwns = [];
   let eventsJoins = [];
   let eventsRunning = [];
 
-  syncAuth().then(() => {
-    auth.subscribe(a => {
-      account_id = a.accountId;
+  syncAuth()
+    .then(() => {
+      const account_id = getAccountID();
 
       return callAPI("/event/list", "GET", { query: { account_id } })
         .then(r => {
@@ -29,7 +26,6 @@
           eventsRunning = events_running;
         });
     });
-  });
 </script>
 
 <div>
@@ -37,8 +33,8 @@
   <LoginButton></LoginButton>
   <Anchor href="/auth" label="auth"></Anchor>
   <Anchor href="/event/new" label="new event"></Anchor>
-  <h1>event</h1>
-  <h2>my event</h2>
+  <h3>event</h3>
+  <h4>my event</h4>
   <ul>
     {#each eventsOwns as e}
       <li>
@@ -46,7 +42,7 @@
       </li>
     {/each}
   </ul>
-  <h2>joined event</h2>
+  <h4>joined event</h4>
   <ul>
     {#each eventsJoins as e}
       <li>
@@ -54,7 +50,7 @@
       </li>
     {/each}
   </ul>
-  <h2>event onboard</h2>
+  <h4>event onboard</h4>
   <ul>
     {#each eventsRunning as e}
       <li>
