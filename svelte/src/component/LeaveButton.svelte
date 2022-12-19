@@ -11,19 +11,8 @@
 </script>
 
 <script>
-  import { auth } from "../store/auth";
-  import { callAPI } from "../tool/callApi";
+  import { leave } from "./join";
 
   export let event_id;
-  let account_id;
-  auth.subscribe(a => {
-    account_id = a.accountId;
-  });
-
-  function leave() {
-    const body = { event_id, account_id };
-    const data = { body };
-    return callAPI("/event/leave", "POST", data);
-  }
 </script>
-<input type="button" value="leave" on:click={leave}/>
+<input type="button" value="leave" on:click={leave(event_id)}/>

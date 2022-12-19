@@ -280,6 +280,7 @@ func WhoAmI() echo.HandlerFunc {
 					Account:      *a,
 					MailAccounts: maList,
 				}
+				wr.Mask()
 
 				return nil
 			})

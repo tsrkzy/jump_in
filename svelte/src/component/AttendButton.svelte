@@ -12,7 +12,6 @@
 
 <script>
   import { attend } from "./join";
-
   export let event_id;
 
 </script>

@@ -36,7 +36,7 @@ func CreateInvitation(ctx *context.Context, tx *sql.Tx, invitation *models.Invit
 		lg.Debug("create mail_account and account")
 		/* mail_account と account がない場合は作成 */
 		a = &models.Account{
-			Name: strings.Split(mailAddress, "@")[0],
+			Name: fmt.Sprintf("user=%s", strings.Split(mailAddress, "@")[0]),
 		}
 		err := a.Insert(*ctx, tx, boil.Infer())
 		if err != nil {
