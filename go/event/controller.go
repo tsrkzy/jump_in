@@ -362,6 +362,8 @@ func Leave() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, response.Errors{})
 		}
 
+		dr := &DetailResponse{}
+
 		ctx := context.Background()
 		/* open DB Tx */
 		err = myDB.Tx(ctx, func(tx *sql.Tx) error {
@@ -386,15 +388,15 @@ func Leave() echo.HandlerFunc {
 					return err
 				}
 
-				if !exA {
-					/* 存在しない == 参加していないなら終了 */
-					return nil
+				if exA {
+					_, err = models.Attends(qm.Where("event_id = ? and account_id = ?", eId, aId)).DeleteAll(ctx, tx)
+					if err != nil {
+						return err
+					}
 				}
 
-				_, err = models.Attends(qm.Where("event_id = ? and account_id = ?", eId, aId)).DeleteAll(ctx, tx)
-				if err != nil {
-					return err
-				}
+				/* 詳細作成 */
+				dr, err = getDetail(ctx, tx, r.EventId)
 
 				return nil
 			})
@@ -406,6 +408,8 @@ func Leave() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, response.Errors{})
 		}
 
-		return c.JSON(http.StatusOK, response.Ok())
+		lr := LeaveResponse{*dr}
+
+		return c.JSON(http.StatusOK, lr)
 	}
 }

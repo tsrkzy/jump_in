@@ -25,9 +25,36 @@
     owner: {},
     participants: [],
   };
+
+  function setEvent(event) {
+    console.log("index.setEvent", event); // @DELETEME
+    const {
+      name
+      , account_id
+      , event_group_id
+      , created_at
+      , owner
+      , participants = []
+    } = event;
+    e.name = name;
+    e.accountId = account_id;
+    e.eventGroupId = event_group_id;
+    e.createdAt = created_at;
+    e.owner = owner;
+    e.participants = participants;
+  }
+
   syncAuth().then(() => {
     return callAPI(`/event/detail`, "GET", { query: { event_id } })
+      .then(r => {
+        setEvent(r);
+      });
   });
+
+  function onUpdateEvent(e) {
+    const event = e.detail;
+    setEvent(event);
+  }
 </script>
 
 <div>
@@ -48,6 +75,6 @@
       "p:name": {p.name}
     </pre>
   {/each}
-  <AttendButton event_id={event_id}></AttendButton>
-  <LeaveButton event_id={event_id}></LeaveButton>
+  <AttendButton event_id={event_id} on:update_event={onUpdateEvent}></AttendButton>
+  <LeaveButton event_id={event_id} on:update_event={onUpdateEvent}></LeaveButton>
 </div>

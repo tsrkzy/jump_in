@@ -12,7 +12,16 @@
 
 <script>
   import { attend } from "./join";
+  import { createEventDispatcher } from "svelte";
+
   export let event_id;
 
+  const dispatch = createEventDispatcher();
+
+  async function onClick() {
+    return attend(event_id).then(r => {
+      dispatch("update_event", r);
+    });
+  }
 </script>
-<input type="button" value="attend" on:click={attend(event_id)}/>
+<input type="button" value="attend" on:click={onClick}/>
