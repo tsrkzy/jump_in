@@ -303,20 +303,17 @@ func Attend() echo.HandlerFunc {
 					return err
 				}
 
-				if exA {
-					/* 既に参加済み */
-					return nil
-				}
+				if !exA {
+					/* 未参加ならば Attend を作成 */
+					att := models.Attend{
+						AccountID: aId,
+						EventID:   eId,
+					}
 
-				/* Attend を作成 */
-				att := models.Attend{
-					AccountID: aId,
-					EventID:   eId,
-				}
-
-				err = att.Insert(ctx, tx, boil.Infer())
-				if err != nil {
-					return err
+					err = att.Insert(ctx, tx, boil.Infer())
+					if err != nil {
+						return err
+					}
 				}
 
 				/* 詳細作成 */
