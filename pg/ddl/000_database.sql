@@ -76,39 +76,41 @@ create table "invitation" (
 
 drop table if exists "attend" cascade;
 create table "attend" (
-    "id"         bigserial                not null
-        primary key,
-    "account_id" bigserial                not null
-        references "account"("id") on delete cascade,
-    "event_id"   bigserial                not null
-        references "event"("id") on delete cascade,
-    "created_at" timestamp with time zone not null default now(),
-    "updated_at" timestamp with time zone not null default now(),
-    unique ("account_id", "event_id")
+    id         BIGSERIAL                NOT NULL
+        PRIMARY KEY,
+    account_id BIGSERIAL                NOT NULL
+        REFERENCES account(id) ON DELETE CASCADE,
+    event_id   BIGSERIAL                NOT NULL
+        REFERENCES event(id) ON DELETE CASCADE,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    UNIQUE (account_id, event_id)
 );
 
-drop table if exists "wish_date" cascade;
-create table "wish_date" (
-    "id"         bigserial                not null
-        primary key,
-    "attend_id"  bigserial                not null
-        references "attend"("id") on delete cascade,
-    "created_at" timestamp with time zone not null default now(),
-    "updated_at" timestamp with time zone not null default now()
+DROP TABLE IF EXISTS candidate CASCADE;
+CREATE TABLE candidate (
+    id         BIGSERIAL                NOT NULL
+        PRIMARY KEY,
+    event_id   BIGSERIAL                NOT NULL
+        REFERENCES attend(id) ON DELETE CASCADE,
+    open_at    TIMESTAMP WITH TIME ZONE NOT NULL,
+    close_at   TIMESTAMP WITH TIME ZONE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
 
-drop table if exists "event_create_mail" cascade;
-create table "event_create_mail" (
-    "id"         bigserial                not null
-        primary key,
-    "event_id"   bigserial                not null
-        references "event"("id") on delete cascade,
-    "created_at" timestamp with time zone not null default now(),
-    "updated_at" timestamp with time zone not null default now()
+DROP TABLE IF EXISTS event_create_mail CASCADE;
+CREATE TABLE event_create_mail (
+    id         BIGSERIAL                NOT NULL
+        PRIMARY KEY,
+    event_id   BIGSERIAL                NOT NULL
+        REFERENCES event(id) ON DELETE CASCADE,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
-drop table if exists "event_announce_mail" cascade;
+DROP TABLE IF EXISTS event_announce_mail CASCADE;
 create table "event_announce_mail" (
     "id"         bigserial                not null
         primary key,

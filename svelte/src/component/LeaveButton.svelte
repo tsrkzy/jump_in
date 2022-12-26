@@ -11,7 +11,7 @@
 </script>
 
 <script>
-  import { leave } from "./join";
+  import { leave } from "./event";
   import { createEventDispatcher } from "svelte";
 
   export let event_id;

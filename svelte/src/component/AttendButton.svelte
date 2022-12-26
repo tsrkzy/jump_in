@@ -11,7 +11,7 @@
 </script>
 
 <script>
-  import { attend } from "./join";
+  import { attend } from "./event";
   import { createEventDispatcher } from "svelte";
 
   export let event_id;

@@ -14,3 +14,11 @@ export function leave(event_id) {
   const data = { body };
   return callAPI("/event/leave", "POST", data);
 }
+
+
+export function vote(event_id, candiates) {
+  const account_id = getAccountID();
+  const body = { event_id, candidates, account_id };
+  const data = { body };
+  return callAPI("/event/vote", "POST", data);
+}

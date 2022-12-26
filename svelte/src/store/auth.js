@@ -42,6 +42,15 @@ export function getSAuth() {
   return get(auth);
 }
 
+/**
+ * JSのStoreがアカウントIDを保持している(≒ログイン中)ならtrue
+ * ( cookieの寿命が切れていても、それがJS側に同期されていなければtrueを返す )
+ * @returns {boolean}
+ */
+export function isLoggedIn() {
+  return !!get(auth).accountId;
+}
+
 
 /**
  * /whoami を叩いて認証情報を取得、LocalStorage及びstoreでキャッシュする

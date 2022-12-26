@@ -1,0 +1,71 @@
+<script context="module">
+  export function load({ params }) {
+    const { event_id } = params;
+    return {
+      props: {
+        event_id
+      }
+    };
+  }
+</script>
+
+<script>
+  import { createEventDispatcher } from "svelte";
+  import { dateToYYYYMM } from "./date";
+
+  export let event_id;
+
+  const hours = [{ value: null, label: "未選択" },
+    ...Array(12).fill(0).map((_, _i) => {
+      /* 09 ... 21 */
+      const i = _i + 9;
+      const label = `${i}`.padStart(2, "0");
+      return { value: i, label };
+    })
+  ];
+
+  let openDate = null;
+  let openTime = null;
+  $: openDateStr = !openDate ? "" : new Date(openDate).toLocaleDateString();
+  $: openTimeStr = !openTime ? "" : `${openTime}:00`;
+
+  function onChangeOpenDate(e) {
+    /* d: 2022-12-29 */
+    const d = e.currentTarget.value;
+    console.log("AddCandidate.onChangeOpenDate", d);
+    openDate = d;
+  }
+
+  function onChangeOpenTime(e) {
+    /* d: 0〜24 */
+    const d = e.currentTarget.value;
+    console.log("AddCandidate.onChangeOpenTime", d);
+    openTime = d;
+  }
+
+  const dispatch = createEventDispatcher();
+
+  function onClickAddCandidate() {
+    console.log("AddCandidate.onClickAddCandidate");
+    const checked = true;
+    const d = new Date(openDate);
+    d.setHours(openTime);
+    const value = dateToYYYYMM(d);
+    const openAt = d.toLocaleString();
+
+    const candidate = { id: null, d, value, openAt, checked };
+    dispatch("add_candidates", { candidates: [candidate] });
+  }
+</script>
+
+<div>
+  <input type="date" value="{openDate}" on:change={onChangeOpenDate}>
+  <label>
+    <select on:change={onChangeOpenTime}>
+      {#each hours as h}
+        <option value="{h.value}">{h.label}</option>
+      {/each}
+    </select>
+  </label>
+  <input disabled="{!openTime || !openDate}" type="button" value="Add Candidate" on:click={onClickAddCandidate}/>
+</div>
