@@ -1,6 +1,10 @@
 import { callAPI } from "../tool/callApi";
 import { getAccountID } from "../tool/storage";
 
+export function getDetail(event_id) {
+  return callAPI(`/event/detail`, "GET", { query: { event_id } });
+}
+
 export function attend(event_id) {
   const account_id = getAccountID();
   const body = { event_id, account_id };
@@ -16,7 +20,7 @@ export function leave(event_id) {
 }
 
 
-export function vote(event_id, candiates) {
+export function vote(event_id, candidates) {
   const account_id = getAccountID();
   const body = { event_id, candidates, account_id };
   const data = { body };

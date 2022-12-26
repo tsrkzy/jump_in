@@ -1,19 +1,7 @@
-<script context="module">
-  export function load({ params }) {
-    const { event_id } = params;
-    return {
-      props: {
-        event_id
-      }
-    };
-  }
-</script>
-
 <script>
   import { createEventDispatcher } from "svelte";
+  import CButton from "./CButton.svelte";
   import { dateToYYYYMM } from "./date";
-
-  export let event_id;
 
   const hours = [{ value: null, label: "未選択" },
     ...Array(12).fill(0).map((_, _i) => {
@@ -67,5 +55,5 @@
       {/each}
     </select>
   </label>
-  <input disabled="{!openTime || !openDate}" type="button" value="Add Candidate" on:click={onClickAddCandidate}/>
+  <CButton disabled="{!openTime || !openDate}" value="Add Candidate" on:click={onClickAddCandidate}></CButton>
 </div>

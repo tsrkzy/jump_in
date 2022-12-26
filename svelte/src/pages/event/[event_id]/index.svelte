@@ -13,14 +13,18 @@
 <script>
   import AddCandidate from "../../../component/AddCandidate.svelte";
   import { dateToYYYYMM } from "../../../component/date";
+  import {
+    attend,
+    getDetail,
+    leave,
+    vote
+  } from "../../../component/event";
   import { syncAuth } from "../../../store/auth";
-  import { callAPI } from "../../../tool/callApi";
-  import Candidates, { candidates } from "../../../component/Candidates.svelte";
-  import AttendButton from "../../../component/AttendButton.svelte";
-  import LeaveButton from "../../../component/LeaveButton.svelte";
+  import Candidates from "../../../component/Candidates.svelte";
+  import CButton from "../../../component/CButton.svelte";
 
   export let event_id = "";
-  let e = {
+  let event = {
     name: "",
     accountId: "",
     eventGroupId: "",
@@ -30,8 +34,8 @@
     candidates: [],
   };
 
-  function setEvent(event) {
-    console.log("index.setEvent", event); // @DELETEME
+  function setEvent(_event) {
+    console.log("index.setEvent", _event); // @DELETEME
 
     const now = new Date();
     const {
@@ -53,28 +57,21 @@
 
         return { id, d, value, openAt, checked };
       })
-    } = event;
-    e.name = name;
-    e.accountId = account_id;
-    e.eventGroupId = event_group_id;
-    e.createdAt = created_at;
-    e.owner = owner;
-    e.participants = participants;
-    e.candidates = candidates;
+    } = _event;
+    event.name = name;
+    event.accountId = account_id;
+    event.eventGroupId = event_group_id;
+    event.createdAt = created_at;
+    event.owner = owner;
+    event.participants = participants;
+    event.candidates = candidates;
   }
 
   syncAuth().then(() => {
-    return callAPI(`/event/detail`, "GET", { query: { event_id } })
-      .then(r => {
-        setEvent(r);
-      });
+    return getDetail(event_id).then(r => {
+      setEvent(r);
+    });
   });
-
-  function onUpdateEvent(e) {
-    const event = e.detail;
-    setEvent(event);
-  }
-
 
   function updateCandidates(e) {
     const changes = e.detail;
@@ -98,43 +95,58 @@
   function addCandidates(e) {
     const { candidates: cList } = e.detail;
     console.log("Candidates.addCandidates", cList);
-    e.candidates = [...e.candidates, ...cList]
+    event.candidates = [...event.candidates, ...cList]
       .filter((nc, i, a) => a.findIndex(_nc => _nc.openAt === nc.openAt) === i);
   }
 
-  function onSubmitCandidates() {
+  async function onSubmitCandidates() {
     console.log("Candidates.onSubmitCandidates");
-    const voteCandidates = e.candidates.filter(c => c.checked);
+    const voteCandidates = event.candidates.filter(c => c.checked);
     console.log(voteCandidates); // @DELETEME
+    return vote(event_id, voteCandidates);
+  }
+
+  async function onClickAttend() {
+    return attend(event_id).then(r => {
+      /* @TODO candidates を上書きしてしまう */
+      setEvent(r);
+    });
+  }
+
+  async function onClickLeave() {
+    return leave(event_id).then(r => {
+      /* @TODO candidates を上書きしてしまう */
+      setEvent(r);
+    });
   }
 </script>
 
 <div>
   <h3>event: {event_id}</h3>
   <pre>
-"e.name":{e.name}
-    "e.accountId":{e.accountId}
-    "e.eventGroupId":{e.eventGroupId}
-    "e.createdAt":{e.createdAt}
+"e.name":{event.name}
+    "e.accountId":{event.accountId}
+    "e.eventGroupId":{event.eventGroupId}
+    "e.createdAt":{event.createdAt}
   </pre>
   <h3>candidate</h3>
-  <Candidates event_id="{event_id}" candidates="{e.candidates}"
+  <Candidates event_id="{event_id}" candidates="{event.candidates}"
               on:update_candidates={updateCandidates}
               on:add_candidates={addCandidates}
   ></Candidates>
-  <AddCandidate event_id="{event_id}"></AddCandidate>
-  <input type="button" value="Submit" on:click={onSubmitCandidates}/>
-  {candidates.filter(c => c.checked).map(c => c.openAt)}
+  <AddCandidate on:add_candidates={addCandidates}></AddCandidate>
+  <CButton value="Submit" on:click={onSubmitCandidates}></CButton>
+  {event.candidates.filter(c => c.checked).map(c => c.openAt)}
   <pre>
-"e.owner.id": {e.owner.id}
-    "e.owner.name": {e.owner.name}
+"e.owner.id": {event.owner.id}
+    "e.owner.name": {event.owner.name}
   </pre>
-  {#each e.participants as p }
+  {#each event.participants as p }
     <pre>
 "p:id": {p.id}
       "p:name": {p.name}
     </pre>
   {/each}
-  <AttendButton event_id={event_id} on:update_event={onUpdateEvent}></AttendButton>
-  <LeaveButton event_id={event_id} on:update_event={onUpdateEvent}></LeaveButton>
+  <CButton value="Attend" on:click={onClickAttend}></CButton>
+  <CButton value="Leave" on:click={onClickLeave}></CButton>
 </div>
