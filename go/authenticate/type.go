@@ -37,9 +37,34 @@ type Result struct {
 	IpAddress   string `json:"ip_address"`
 }
 
-type WhoAmIResponse struct {
+type Account struct {
+	ID string `json:"id"`
 	models.Account
-	MailAccounts []models.MailAccount `json:"mail_accounts"`
+}
+
+func CreateAccount(a *models.Account) *Account {
+	account := Account{Account: *a}
+	account.ID = fmt.Sprintf("%d", account.Account.ID)
+	return &account
+}
+
+type MailAccount struct {
+	ID        string `json:"id"`
+	AccountID string `json:"account_id"`
+	models.MailAccount
+}
+
+func CreateMailAccount(ma *models.MailAccount) *MailAccount {
+	mailAccount := MailAccount{MailAccount: *ma}
+	mailAccount.ID = fmt.Sprintf("%d", mailAccount.MailAccount.ID)
+	mailAccount.AccountID = fmt.Sprintf("%d", mailAccount.MailAccount.AccountID)
+
+	return &mailAccount
+}
+
+type WhoAmIResponse struct {
+	Account
+	MailAccounts []MailAccount `json:"mail_accounts"`
 }
 
 // Mask

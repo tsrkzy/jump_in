@@ -15,7 +15,7 @@ const DEFAULT_EMAIL = "tsrmix+echo@gmail.com"
 func TestCreate001(t *testing.T) {
 
 	respMl1, w, err := Login(t, DEFAULT_EMAIL)
-	accountId := fmt.Sprintf("%d", w.ID)
+	accountId := fmt.Sprintf("%s", w.ID)
 	assert.NoError(t, err)
 
 	cEc := resty.New().SetDebug(TestDebug)
@@ -44,20 +44,20 @@ func TestCreate001(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, respEl.StatusCode())
 
-	aId := 0
+	aId := ""
 	for i, r := range resEl.EventsOwns {
 		if i == 0 {
-			aId = int(r.AccountID)
-			fmt.Printf("account_id: %d\n", aId)
+			aId = r.AccountID
+			fmt.Printf("account_id: %s\n", aId)
 		} else {
-			assert.Equal(t, aId, int(r.AccountID))
+			assert.Equal(t, aId, r.AccountID)
 		}
 	}
 }
 
 func TestAttend001(t *testing.T) {
 	respMl, w, err := Login(t, DEFAULT_EMAIL)
-	accountId := fmt.Sprintf("%d", w.ID)
+	accountId := fmt.Sprintf("%s", w.ID)
 	assert.NoError(t, err)
 
 	cEc := resty.New().SetDebug(TestDebug)
@@ -74,7 +74,7 @@ func TestAttend001(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, respEc.StatusCode())
 
-	eventId := fmt.Sprintf("%d", resEc.ID)
+	eventId := fmt.Sprintf("%s", resEc.ID)
 
 	/* 参加 */
 	cEa1 := resty.New().SetDebug(TestDebug)

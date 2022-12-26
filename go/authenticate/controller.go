@@ -271,13 +271,13 @@ func WhoAmI() echo.HandlerFunc {
 				if err != nil {
 					return err
 				}
-				maList := make([]models.MailAccount, 0)
+				maList := make([]MailAccount, 0)
 				for _, ma := range mailAccounts {
-					maList = append(maList, *ma)
+					maList = append(maList, *CreateMailAccount(ma))
 				}
 
 				wr = &WhoAmIResponse{
-					Account:      *a,
+					Account:      *CreateAccount(a),
 					MailAccounts: maList,
 				}
 				wr.Mask()

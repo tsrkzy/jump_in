@@ -3,6 +3,7 @@ package event
 import (
 	"context"
 	"database/sql"
+	"github.com/tsrkzy/jump_in/authenticate"
 	"github.com/tsrkzy/jump_in/lg"
 	"github.com/tsrkzy/jump_in/models"
 	"github.com/volatiletech/sqlboiler/v4/boil"
@@ -40,7 +41,7 @@ func fetchEventOwns(ctx context.Context, tx *sql.Tx, accountId int64, limit int)
 
 	eventOwns := make([]Event, 0)
 	for _, e := range eOwns {
-		ee := Event{*e}
+		ee := *CreateEvent(e)
 		eventOwns = append(eventOwns, ee)
 	}
 
@@ -74,7 +75,7 @@ func fetchEventJoins(ctx context.Context, tx *sql.Tx, accountId int64, limit int
 
 	eventJoins := make([]Event, 0)
 	for _, e := range eJoins {
-		ee := Event{*e}
+		ee := *CreateEvent(e)
 		eventJoins = append(eventJoins, ee)
 	}
 
@@ -93,29 +94,29 @@ func fetchNewEventsWithout(ctx context.Context, tx *sql.Tx, eIdExclude []interfa
 
 	eventList := make([]Event, 0)
 	for _, e := range eList {
-		ee := Event{*e}
+		ee := *CreateEvent(e)
 		eventList = append(eventList, ee)
 	}
 
 	return eventList, nil
 }
 
-func getOwner(ctx context.Context, tx *sql.Tx, eventId string) (User, error) {
+func getOwner(ctx context.Context, tx *sql.Tx, eventId string) (authenticate.Account, error) {
 	e, err := models.Events(qm.Where("id = ?", eventId)).One(ctx, tx)
 	if err != nil {
-		return User{}, err
+		return authenticate.Account{}, err
 	}
 	ownerId := e.AccountID
 	aIdList := []int64{ownerId}
 	users, err := getUsers(ctx, tx, aIdList)
 	if err != nil {
-		return User{}, err
+		return authenticate.Account{}, err
 	}
 	owner := users[0]
 	return owner, nil
 }
 
-func getParticipants(ctx context.Context, tx *sql.Tx, eventId string) ([]User, error) {
+func getParticipants(ctx context.Context, tx *sql.Tx, eventId string) ([]authenticate.Account, error) {
 	attendList, err := models.Attends(qm.Where("event_id = ?", eventId)).All(ctx, tx)
 	if err != nil {
 		return nil, err
@@ -133,7 +134,7 @@ func getParticipants(ctx context.Context, tx *sql.Tx, eventId string) ([]User, e
 	return users, nil
 }
 
-func getUsers(ctx context.Context, tx *sql.Tx, accountIdList []int64) ([]User, error) {
+func getUsers(ctx context.Context, tx *sql.Tx, accountIdList []int64) ([]authenticate.Account, error) {
 	aIn := make([]interface{}, 0)
 	for _, a := range accountIdList {
 		aIn = append(aIn, (interface{})(a))
@@ -144,9 +145,9 @@ func getUsers(ctx context.Context, tx *sql.Tx, accountIdList []int64) ([]User, e
 		return nil, err
 	}
 
-	users := make([]User, 0)
+	users := make([]authenticate.Account, 0)
 	for _, a := range aList {
-		u := User{*a}
+		u := *authenticate.CreateAccount(a)
 		users = append(users, u)
 	}
 

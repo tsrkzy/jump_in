@@ -1,8 +1,10 @@
 package event
 
 import (
+	"fmt"
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/go-ozzo/ozzo-validation/is"
+	"github.com/tsrkzy/jump_in/authenticate"
 	"github.com/tsrkzy/jump_in/models"
 )
 
@@ -19,7 +21,18 @@ func (r ListRequest) Validate() error {
 }
 
 type Event struct {
+	ID           string `json:"id"`
+	AccountID    string `json:"account_id"`
+	EventGroupID string `json:"event_group_id"`
 	models.Event
+}
+
+func CreateEvent(e *models.Event) *Event {
+	event := Event{Event: *e}
+	event.ID = fmt.Sprintf("%d", event.Event.ID)
+	event.AccountID = fmt.Sprintf("%d", event.Event.AccountID)
+	event.EventGroupID = fmt.Sprintf("%d", event.Event.EventGroupID)
+	return &event
 }
 
 type ListResponse struct {
@@ -51,6 +64,13 @@ type CreateResponse struct {
 	Event
 }
 
+type UpdateRequest struct {
+	Event
+}
+type UpdateResponse struct {
+	Event
+}
+
 type DetailRequest struct {
 	EventId string `query:"event_id"`
 }
@@ -65,14 +85,10 @@ func (r DetailRequest) Validate() error {
 	)
 }
 
-type User struct {
-	models.Account
-}
-
 type DetailResponse struct {
 	Event
-	Owner        User   `json:"owner"`
-	Participants []User `json:"participants"`
+	Owner        authenticate.Account   `json:"owner"`
+	Participants []authenticate.Account `json:"participants"`
 }
 
 type AttendRequest struct {

@@ -167,8 +167,10 @@ func getDetail(ctx context.Context, tx *sql.Tx, eventId string) (*DetailResponse
 		return nil, err
 	}
 
+	event := CreateEvent(e)
+
 	dr := &DetailResponse{
-		Event:        Event{*e},
+		Event:        *event,
 		Owner:        owner,
 		Participants: participants,
 	}
@@ -237,7 +239,9 @@ func Create() echo.HandlerFunc {
 					return err
 				}
 
-				res = &CreateResponse{Event{*e}}
+				event := CreateEvent(e)
+
+				res = &CreateResponse{*event}
 
 				return nil
 			})
@@ -248,6 +252,49 @@ func Create() echo.HandlerFunc {
 		}
 
 		return c.JSON(http.StatusOK, res)
+	}
+}
+
+func Update() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		r := &UpdateRequest{}
+		err := c.Bind(r)
+		if err != nil {
+			lg.Error(err)
+			return c.JSON(http.StatusBadRequest, response.Errors{})
+		}
+		/* validation */
+		if err := c.Validate(r); err != nil {
+			vErr := validate.ErrorIntoJson(err)
+			return c.JSON(http.StatusBadRequest, vErr)
+		}
+
+		/* db接続 */
+		myDB, err := database.Open()
+		if err != nil {
+			lg.Error(err)
+			return c.JSON(http.StatusInternalServerError, response.Errors{})
+		}
+
+		ur := &UpdateResponse{}
+
+		ctx := context.Background()
+		/* open DB Tx */
+		err = myDB.Tx(ctx, func(tx *sql.Tx) error {
+			return sess.Open(c, myDB, func(session *sessions.Session) error {
+				eId := r.ID
+				e, err := models.Events(qm.Where("id = ?", eId)).One(ctx, tx)
+				if err != nil {
+					return c.JSON(http.StatusNotFound, response.Errors{})
+				}
+
+				ur.Event = *CreateEvent(e)
+
+				return nil
+			})
+		})
+
+		return c.JSON(http.StatusOK, ur)
 	}
 }
 
