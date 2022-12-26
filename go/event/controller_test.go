@@ -53,6 +53,22 @@ func TestCreate001(t *testing.T) {
 			assert.Equal(t, aId, r.AccountID)
 		}
 	}
+
+	eventNameUpdated := "test_event_name_updated"
+	cEn := resty.New().SetDebug(TestDebug)
+	cEn.SetCookies(respMl1.Cookies())
+	reqEn := UpdateNameRequest{
+		EventID:   resEc.Event.ID,
+		EventName: eventNameUpdated,
+	}
+	resEn := UpdateNameResponse{}
+	respEn, err := cEn.R().
+		SetBody(reqEn).
+		SetResult(&resEn).
+		Post("http://localhost:80/api/event/name/update")
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, respEn.StatusCode())
+	assert.Equal(t, eventNameUpdated, resEn.Event.Name)
 }
 
 func TestAttend001(t *testing.T) {

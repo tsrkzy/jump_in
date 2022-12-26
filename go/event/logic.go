@@ -116,6 +116,20 @@ func getOwner(ctx context.Context, tx *sql.Tx, eventId string) (authenticate.Acc
 	return owner, nil
 }
 
+func getCandidates(ctx context.Context, tx *sql.Tx, eventId string) ([]Candidate, error) {
+	candidates, err := models.Candidates(qm.Where("event_id = ?", eventId)).All(ctx, tx)
+	if err != nil {
+		return nil, err
+	}
+
+	cList := make([]Candidate, 0)
+	for _, c := range candidates {
+		cList = append(cList, *CreateCandidate(c))
+	}
+
+	return cList, nil
+}
+
 func getParticipants(ctx context.Context, tx *sql.Tx, eventId string) ([]authenticate.Account, error) {
 	attendList, err := models.Attends(qm.Where("event_id = ?", eventId)).All(ctx, tx)
 	if err != nil {

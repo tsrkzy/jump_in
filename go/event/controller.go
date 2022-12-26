@@ -162,6 +162,12 @@ func getDetail(ctx context.Context, tx *sql.Tx, eventId string) (*DetailResponse
 	if err != nil {
 		return nil, err
 	}
+
+	candidates, err := getCandidates(ctx, tx, eventId)
+	if err != nil {
+		return nil, err
+	}
+
 	participants, err := getParticipants(ctx, tx, eventId)
 	if err != nil {
 		return nil, err
@@ -171,6 +177,7 @@ func getDetail(ctx context.Context, tx *sql.Tx, eventId string) (*DetailResponse
 
 	dr := &DetailResponse{
 		Event:        *event,
+		Candidates:   candidates,
 		Owner:        owner,
 		Participants: participants,
 	}
@@ -255,9 +262,9 @@ func Create() echo.HandlerFunc {
 	}
 }
 
-func Update() echo.HandlerFunc {
+func UpdateName() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		r := &UpdateRequest{}
+		r := &UpdateNameRequest{}
 		err := c.Bind(r)
 		if err != nil {
 			lg.Error(err)
@@ -276,16 +283,25 @@ func Update() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, response.Errors{})
 		}
 
-		ur := &UpdateResponse{}
+		ur := &UpdateNameResponse{}
 
 		ctx := context.Background()
 		/* open DB Tx */
 		err = myDB.Tx(ctx, func(tx *sql.Tx) error {
 			return sess.Open(c, myDB, func(session *sessions.Session) error {
-				eId := r.ID
+				eId, err := helper.StrToID(r.EventID)
+				if err != nil {
+					return err
+				}
 				e, err := models.Events(qm.Where("id = ?", eId)).One(ctx, tx)
 				if err != nil {
-					return c.JSON(http.StatusNotFound, response.Errors{})
+					return err
+				}
+
+				e.Name = r.EventName
+				_, err = e.Update(ctx, tx, boil.Infer())
+				if err != nil {
+					return err
 				}
 
 				ur.Event = *CreateEvent(e)
@@ -293,6 +309,11 @@ func Update() echo.HandlerFunc {
 				return nil
 			})
 		})
+
+		if err != nil {
+			lg.Error(err)
+			return c.JSON(http.StatusInternalServerError, response.Errors{})
+		}
 
 		return c.JSON(http.StatusOK, ur)
 	}

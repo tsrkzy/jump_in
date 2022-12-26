@@ -35,6 +35,19 @@ func CreateEvent(e *models.Event) *Event {
 	return &event
 }
 
+type Candidate struct {
+	ID      string `json:"id"`
+	EventID string `json:"event_id"`
+	models.Candidate
+}
+
+func CreateCandidate(c *models.Candidate) *Candidate {
+	candidate := Candidate{Candidate: *c}
+	candidate.ID = fmt.Sprintf("%d", candidate.Candidate.ID)
+	candidate.EventID = fmt.Sprintf("%d", candidate.Candidate.EventID)
+	return &candidate
+}
+
 type ListResponse struct {
 	EventsOwns    []Event `json:"events_owns"`
 	EventsJoins   []Event `json:"events_joins"`
@@ -64,10 +77,25 @@ type CreateResponse struct {
 	Event
 }
 
-type UpdateRequest struct {
-	Event
+type UpdateNameRequest struct {
+	EventID   string `json:"event_id"`
+	EventName string `json:"name"`
 }
-type UpdateResponse struct {
+
+func (r UpdateNameRequest) Validate() error {
+	return validation.ValidateStruct(&r,
+		validation.Field(
+			&r.EventID,
+			validation.Required.Error("イベントIDは必須です"),
+		), validation.Field(
+			&r.EventName,
+			validation.Required.Error("イベント名は必須です"),
+			validation.RuneLength(5, 40).Error("イベント名は5〜40文字で指定してください"),
+		),
+	)
+}
+
+type UpdateNameResponse struct {
 	Event
 }
 
@@ -87,6 +115,7 @@ func (r DetailRequest) Validate() error {
 
 type DetailResponse struct {
 	Event
+	Candidates   []Candidate            `json:"candidates"`
 	Owner        authenticate.Account   `json:"owner"`
 	Participants []authenticate.Account `json:"participants"`
 }
