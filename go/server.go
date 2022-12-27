@@ -74,6 +74,7 @@ func main() {
 	e.GET("/api/event/detail", au(event.Detail()))
 	e.POST("/api/event/create", au(event.Create()))
 	e.POST("/api/event/name/update", au(event.UpdateName()))
+	e.POST("/api/event/candidate/update", au(event.UpdateCandidate()))
 
 	/* 参加/離脱 */
 	e.POST("/api/event/attend", au(event.Attend()))

@@ -14,6 +14,7 @@ require (
 	github.com/lib/pq v1.10.5
 	github.com/spf13/viper v1.13.0
 	github.com/stretchr/testify v1.8.0
+	github.com/tj/go-pg-escape v1.1.0
 	github.com/volatiletech/null/v8 v8.1.2
 	github.com/volatiletech/randomize v0.0.1
 	github.com/volatiletech/sqlboiler/v4 v4.13.0
@@ -23,6 +24,7 @@ require (
 
 require (
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
+	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/gofrs/uuid v4.0.0+incompatible // indirect

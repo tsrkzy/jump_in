@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/tsrkzy/jump_in/authenticate"
+	"github.com/tsrkzy/jump_in/models"
 	"gopkg.in/resty.v1"
 	"net/http"
 	"testing"
@@ -69,6 +70,27 @@ func TestCreate001(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, respEn.StatusCode())
 	assert.Equal(t, eventNameUpdated, resEn.Event.Name)
+
+	cCu := resty.New().SetDebug(TestDebug)
+	cCu.SetCookies(respMl1.Cookies())
+	candidates := []Candidate{
+		{Candidate: models.Candidate{OpenAt: "202212271200"}},
+		{Candidate: models.Candidate{OpenAt: "202301011200"}},
+		{Candidate: models.Candidate{OpenAt: "202304011200"}},
+	}
+
+	reqCu := UpdateCandidateRequest{
+		EventID:    resEc.Event.ID,
+		Candidates: candidates,
+	}
+	resCu := UpdateCandidateResponse{}
+	respCu, err := cCu.R().
+		SetBody(reqCu).
+		SetResult(&resCu).
+		Post("http://localhost:80/api/event/candidate/update")
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, respCu.StatusCode())
+
 }
 
 func TestAttend001(t *testing.T) {

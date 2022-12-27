@@ -35,6 +35,13 @@ func CreateEvent(e *models.Event) *Event {
 	return &event
 }
 
+type EventDetail struct {
+	Event
+	Candidates   []Candidate            `json:"candidates"`
+	Owner        authenticate.Account   `json:"owner"`
+	Participants []authenticate.Account `json:"participants"`
+}
+
 type Candidate struct {
 	ID      string `json:"id"`
 	EventID string `json:"event_id"`
@@ -99,6 +106,24 @@ type UpdateNameResponse struct {
 	Event
 }
 
+type UpdateCandidateRequest struct {
+	EventID    string      `json:"event_id"`
+	Candidates []Candidate `json:"candidates"`
+}
+
+func (r UpdateCandidateRequest) Validate() error {
+	return validation.ValidateStruct(&r,
+		validation.Field(
+			&r.EventID,
+			validation.Required.Error("イベントIDは必須です"),
+		),
+	)
+}
+
+type UpdateCandidateResponse struct {
+	EventDetail
+}
+
 type DetailRequest struct {
 	EventId string `query:"event_id"`
 }
@@ -113,11 +138,9 @@ func (r DetailRequest) Validate() error {
 	)
 }
 
+// DetailResponse
 type DetailResponse struct {
-	Event
-	Candidates   []Candidate            `json:"candidates"`
-	Owner        authenticate.Account   `json:"owner"`
-	Participants []authenticate.Account `json:"participants"`
+	EventDetail
 }
 
 type AttendRequest struct {

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
+	escape "github.com/tj/go-pg-escape"
 	"github.com/tsrkzy/jump_in/authenticate"
 	"github.com/tsrkzy/jump_in/database"
 	"github.com/tsrkzy/jump_in/helper"
@@ -15,8 +16,10 @@ import (
 	"github.com/tsrkzy/jump_in/sess"
 	"github.com/tsrkzy/jump_in/validate"
 	"github.com/volatiletech/sqlboiler/v4/boil"
+	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"net/http"
+	"strings"
 )
 
 func List() echo.HandlerFunc {
@@ -136,7 +139,8 @@ func Detail() echo.HandlerFunc {
 		/* 詳細作成 */
 		ctx := context.Background()
 		err = myDB.Tx(ctx, func(tx *sql.Tx) error {
-			dr, err = getDetail(ctx, tx, r.EventId)
+			ed, err := getDetail(ctx, tx, r.EventId)
+			dr = &DetailResponse{EventDetail: *ed}
 			return err
 		})
 		if err != nil {
@@ -151,7 +155,7 @@ func Detail() echo.HandlerFunc {
 	}
 }
 
-func getDetail(ctx context.Context, tx *sql.Tx, eventId string) (*DetailResponse, error) {
+func getDetail(ctx context.Context, tx *sql.Tx, eventId string) (*EventDetail, error) {
 	e, err := models.Events(qm.Where("id = ?", eventId)).One(ctx, tx)
 	if err != nil {
 		msg := fmt.Sprintf("イベントが見つかりません: %s", eventId)
@@ -175,7 +179,7 @@ func getDetail(ctx context.Context, tx *sql.Tx, eventId string) (*DetailResponse
 
 	event := CreateEvent(e)
 
-	dr := &DetailResponse{
+	dr := &EventDetail{
 		Event:        *event,
 		Candidates:   candidates,
 		Owner:        owner,
@@ -319,6 +323,105 @@ func UpdateName() echo.HandlerFunc {
 	}
 }
 
+func UpdateCandidate() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		r := &UpdateCandidateRequest{}
+		err := c.Bind(r)
+		if err != nil {
+			lg.Error(err)
+			return c.JSON(http.StatusBadRequest, response.Errors{})
+		}
+
+		/* validation */
+		if err := c.Validate(r); err != nil {
+			vErr := validate.ErrorIntoJson(err)
+			return c.JSON(http.StatusBadRequest, vErr)
+		}
+
+		/* db接続 */
+		myDB, err := database.Open()
+		if err != nil {
+			lg.Error(err)
+			return c.JSON(http.StatusInternalServerError, response.Errors{})
+		}
+
+		ucr := &UpdateCandidateResponse{}
+
+		ctx := context.Background()
+		/* open DB Tx */
+		err = myDB.Tx(ctx, func(tx *sql.Tx) error {
+			return sess.Open(c, myDB, func(session *sessions.Session) error {
+				eId, err := helper.StrToID(r.EventID)
+				candidates := r.Candidates
+
+				if err != nil {
+					return err
+				}
+
+				openAtList := make([]string, 0)
+				for _, candidate := range candidates {
+					openAtList = append(openAtList, candidate.OpenAt)
+				}
+
+				/* 既存の候補日を削除 */
+				err = deleteCandidate(ctx, tx, eId)
+				if err != nil {
+					return err
+				}
+
+				/* 候補日を改めて入れ直し */
+				err = bulkInsertCandidate(ctx, tx, eId, openAtList)
+				if err != nil {
+					return err
+				}
+
+				// 結果的に candidate.open_At に紐づく vote を削除する事も考えたが、
+				// 主催が candidate をこまめに編集する度に vote が消えてしまうのも問題なので残す
+
+				ed, err := getDetail(ctx, tx, r.EventID)
+				if err != nil {
+					return err
+				}
+
+				ucr = &UpdateCandidateResponse{EventDetail: *ed}
+
+				return nil
+			})
+		})
+
+		if err != nil {
+			lg.Error(err)
+			return c.JSON(http.StatusInternalServerError, response.Errors{})
+		}
+
+		return c.JSON(http.StatusOK, ucr)
+	}
+}
+
+func deleteCandidate(ctx context.Context, tx *sql.Tx, eventId int64) error {
+	_, err := models.Candidates(qm.Where("event_id = ?", eventId)).DeleteAll(ctx, tx)
+	return err
+}
+
+func bulkInsertCandidate(ctx context.Context, tx *sql.Tx, eventId int64, openAtList []string) error {
+	q := `INSERT INTO candidate (event_id, open_at)
+ VALUES %s
+ ON CONFLICT DO NOTHING`
+	valueList := make([]string, 0)
+	for _, openAt := range openAtList {
+		value := fmt.Sprintf("( %d , %s )", eventId, escape.Literal(openAt))
+		valueList = append(valueList, value)
+	}
+	values := strings.Join(valueList, ", ")
+	query := fmt.Sprintf(q, values)
+
+	//lg.Debug(query)
+
+	_, err := queries.Raw(query).ExecContext(ctx, tx)
+
+	return err
+}
+
 func Attend() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		r := &AttendRequest{}
@@ -385,7 +488,8 @@ func Attend() echo.HandlerFunc {
 				}
 
 				/* 詳細作成 */
-				dr, err = getDetail(ctx, tx, r.EventId)
+				ed, err := getDetail(ctx, tx, r.EventId)
+				dr = &DetailResponse{EventDetail: *ed}
 
 				return err
 			})
@@ -464,7 +568,8 @@ func Leave() echo.HandlerFunc {
 				}
 
 				/* 詳細作成 */
-				dr, err = getDetail(ctx, tx, r.EventId)
+				ed, err := getDetail(ctx, tx, r.EventId)
+				dr = &DetailResponse{EventDetail: *ed}
 
 				return nil
 			})
