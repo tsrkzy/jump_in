@@ -12,11 +12,13 @@
 
 <script>
   import AddCandidate from "../../../component/AddCandidate.svelte";
-  import { dateToYYYYMM } from "../../../component/date";
+  import Anchor from "../../../component/Anchor.svelte";
+  // import { dateToYYYYMM } from "../../../component/date";
   import {
     attend,
     getDetail,
     leave,
+    updateCandidates,
     vote
   } from "../../../component/event";
   import { syncAuth } from "../../../store/auth";
@@ -37,7 +39,7 @@
   function setEvent(_event) {
     console.log("index.setEvent", _event); // @DELETEME
 
-    const now = new Date();
+    // const now = new Date();
     const {
       name
       , account_id
@@ -45,19 +47,27 @@
       , created_at
       , owner
       , participants = []
-      , candidates = [1, 2, 3].map(v => {
-        const id = `${v}`;
-        let hour = 1000 * 60 * 60;
-        let day = hour * 24;
-        const d = new Date(now.getTime() + day * v);
-
-        const value = dateToYYYYMM(d);
-        const openAt = d.toLocaleString();
-        const checked = true;
-
-        return { id, d, value, openAt, checked };
-      })
+      , candidates: _candidates = []
+      // , candidates = [1, 2, 3].map(v => {
+      //   const id = v;
+      //   let hour = 1000 * 60 * 60;
+      //   let day = hour * 24;
+      //   const d = new Date(now.getTime() + day * v);
+      //
+      //   const value = dateToYYYYMM(d);
+      //   const openAt = d.toLocaleString();
+      //   const checked = true;
+      //
+      //   return { id, d, value, openAt, checked };
+      // })
     } = _event;
+
+    const candidates = _candidates.map(c => ({
+      id: c.id,
+      openAt: c.open_at,
+      checked: false,
+    }));
+
     event.name = name;
     event.accountId = account_id;
     event.eventGroupId = event_group_id;
@@ -73,9 +83,9 @@
     });
   });
 
-  function updateCandidates(e) {
+  function syncVoteCheckState(e) {
     const changes = e.detail;
-    console.log("Candidates.updateCandidates", changes);
+    console.log("Candidates.syncVoteCheckState", changes);
 
     for (let i = 0; i < changes.length; i++) {
       let { candidateId, checked } = changes[i];
@@ -101,8 +111,14 @@
 
   async function onSubmitCandidates() {
     console.log("Candidates.onSubmitCandidates");
+    const openAtList = event.candidates.map(c => c.openAt);
+
+    return updateCandidates(event_id, openAtList);
+  }
+
+  async function onVote() {
+    console.log("index.onVote");
     const voteCandidates = event.candidates.filter(c => c.checked);
-    console.log(voteCandidates); // @DELETEME
     return vote(event_id, voteCandidates);
   }
 
@@ -122,6 +138,7 @@
 </script>
 
 <div>
+  <Anchor href="/event" label="event"></Anchor>
   <h3>event: {event_id}</h3>
   <pre>
 "e.name":{event.name}
@@ -131,11 +148,12 @@
   </pre>
   <h3>candidate</h3>
   <Candidates event_id="{event_id}" candidates="{event.candidates}"
-              on:update_candidates={updateCandidates}
+              on:update_candidates={syncVoteCheckState}
               on:add_candidates={addCandidates}
   ></Candidates>
   <AddCandidate on:add_candidates={addCandidates}></AddCandidate>
-  <CButton value="Submit" on:click={onSubmitCandidates}></CButton>
+  <CButton value="SyncCandidates" on:click={onSubmitCandidates}></CButton>
+  <CButton value="Vote" on:click={onVote}></CButton>
   {event.candidates.filter(c => c.checked).map(c => c.openAt)}
   <pre>
 "e.owner.id": {event.owner.id}

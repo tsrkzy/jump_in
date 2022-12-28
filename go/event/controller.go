@@ -363,6 +363,11 @@ func UpdateCandidate() echo.HandlerFunc {
 					openAtList = append(openAtList, candidate.OpenAt)
 				}
 
+				/* @TODO eventの持ち主のみ ref: cookie:account_id */
+
+				/* @TODO 変更の必要がなければ何もしない */
+				/* @TODO できれば差分だけ追加 */
+
 				/* 既存の候補日を削除 */
 				err = deleteCandidate(ctx, tx, eId)
 				if err != nil {
@@ -377,6 +382,8 @@ func UpdateCandidate() echo.HandlerFunc {
 
 				// 結果的に candidate.open_At に紐づく vote を削除する事も考えたが、
 				// 主催が candidate をこまめに編集する度に vote が消えてしまうのも問題なので残す
+
+				/* @TODO sort candidate */
 
 				ed, err := getDetail(ctx, tx, r.EventID)
 				if err != nil {

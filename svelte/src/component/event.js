@@ -26,3 +26,10 @@ export function vote(event_id, candidates) {
   const data = { body };
   return callAPI("/event/vote", "POST", data);
 }
+
+export function updateCandidates(event_id, openAtList = []) {
+  const candidates = openAtList.map(o => ({ open_at: o }));
+  const body = { account_id, event_id, candidates };
+  const data = { body };
+  return callAPI("/event/candidate/update", "POST", data);
+}

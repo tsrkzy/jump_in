@@ -1,7 +1,9 @@
 <script>
   import { createEventDispatcher } from "svelte";
   import CButton from "./CButton.svelte";
-  import { dateToYYYYMM } from "./date";
+  import {
+    dateToYYYYMMDDhhmm
+  } from "./date";
 
   const hours = [{ value: null, label: "未選択" },
     ...Array(12).fill(0).map((_, _i) => {
@@ -38,10 +40,9 @@
     const checked = true;
     const d = new Date(openDate);
     d.setHours(openTime);
-    const value = dateToYYYYMM(d);
-    const openAt = d.toLocaleString();
+    const openAt = dateToYYYYMMDDhhmm(d);
 
-    const candidate = { id: null, d, value, openAt, checked };
+    const candidate = { id: null, openAt, checked };
     dispatch("add_candidates", { candidates: [candidate] });
   }
 </script>

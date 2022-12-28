@@ -21,7 +21,7 @@
 <div>
   <ul>
     {#each candidates as c}
-      <li>{c.id}: {c.openAt}
+      <li>{c.openAt} ({c.id})
         <VoteCheckbox candidate_id="{c.id}" checked="{c.checked}"></VoteCheckbox>
       </li>
     {/each}
