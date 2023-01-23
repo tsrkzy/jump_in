@@ -1,6 +1,5 @@
 import {
   writable,
-  get
 } from "svelte/store";
 import {
   createAuthCache,
@@ -14,16 +13,6 @@ import {
  * リクエストのパラメータにIDを指定する場合はLocalStorageから取得する */
 export const auth = writable({});
 
-export const authStore = {
-  accountId: null,
-  accountName: null,
-  mailAccounts: [
-    // {
-    //   id
-    //   mailAddress
-    // }
-  ]
-};
 auth.subscribe((a) => {
   console.log("auth", a);
   /*
@@ -33,23 +22,7 @@ auth.subscribe((a) => {
    *  - id
    *  - mailAddress
    * */
-  authStore.accountId = a.accountId;
-  authStore.accountName = a.accountName;
-  authStore.mailAccounts = a.mailAccounts;
 });
-
-export function getSAuth() {
-  return get(auth);
-}
-
-/**
- * JSのStoreがアカウントIDを保持している(≒ログイン中)ならtrue
- * ( cookieの寿命が切れていても、それがJS側に同期されていなければtrueを返す )
- * @returns {boolean}
- */
-export function isLoggedIn() {
-  return !!get(auth).accountId;
-}
 
 
 /**
