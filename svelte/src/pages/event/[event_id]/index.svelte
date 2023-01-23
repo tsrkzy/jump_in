@@ -146,14 +146,14 @@
     "e.eventGroupId":{event.eventGroupId}
     "e.createdAt":{event.createdAt}
   </pre>
-  <h3>candidate</h3>
+  <h3>候補日</h3>
   <Candidates event_id="{event_id}" candidates="{event.candidates}"
               on:update_candidates={syncVoteCheckState}
               on:add_candidates={addCandidates}
   ></Candidates>
   <AddCandidate on:add_candidates={addCandidates}></AddCandidate>
-  <CButton value="SyncCandidates" on:click={onSubmitCandidates}></CButton>
-  <CButton value="Vote" on:click={onVote}></CButton>
+  <CButton value="選択肢を更新" on:click={onSubmitCandidates}></CButton>
+  <CButton value="投票を更新" on:click={onVote}></CButton>
   {event.candidates.filter(c => c.checked).map(c => c.openAt)}
   <pre>
 "e.owner.id": {event.owner.id}

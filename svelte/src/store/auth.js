@@ -18,7 +18,7 @@ auth.subscribe((a) => {
   /*
    * accountId
    * accountName
-   * mailAccounts
+   * mailAccounts:
    *  - id
    *  - mailAddress
    * */

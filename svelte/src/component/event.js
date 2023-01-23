@@ -28,6 +28,7 @@ export function vote(event_id, candidates) {
 }
 
 export function updateCandidates(event_id, openAtList = []) {
+  const account_id = getAccountID();
   const candidates = openAtList.map(o => ({ open_at: o }));
   const body = { account_id, event_id, candidates };
   const data = { body };
