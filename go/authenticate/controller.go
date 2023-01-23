@@ -53,6 +53,7 @@ func Authenticate() echo.HandlerFunc {
 					MaxAge:   60 * 5,
 					HttpOnly: true,
 					Secure:   true,
+					Path:     "/",
 				}
 
 				/* スロットル: 同じメールアドレスについて、10分に3回まで */
@@ -173,6 +174,7 @@ func MagicLink() echo.HandlerFunc {
 					MaxAge:   60 * 60 * 3,
 					HttpOnly: true,
 					Secure:   true,
+					Path:     "/",
 				}
 				lg.Debugf("session choco_chip promoted: %s", chocoChip)
 
@@ -201,6 +203,7 @@ func Logout() echo.HandlerFunc {
 				MaxAge:   -1,
 				HttpOnly: true,
 				Secure:   true,
+				Path:     "/",
 			}
 			return nil
 		})
