@@ -10,6 +10,15 @@ RUN go mod download && go mod verify
 
 COPY . .
 
+#
+# Development
+#
 RUN go install -v -n -a github.com/cosmtrek/air@v1.29.0
-
 CMD ["./bin/air", "-c", ".air.toml"]
+
+
+#
+# Production
+#
+# RUN go build -v -o /usr/local/bin/app
+# CMD ["/usr/local/bin/app"]

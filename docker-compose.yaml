@@ -2,6 +2,7 @@ version: "3.9"
 services:
   go_echo:
     container_name: go_echo
+    image: jump_in-go_echo
     build:
       context: ./go
       dockerfile: ./Dockerfile
@@ -26,7 +27,7 @@ services:
       - ./go:/usr/src/app
   go_nginx:
     container_name: go_nginx
-    image: jump_in_go_nginx
+    image: jump_in-go_nginx
     build:
       context: ./svelte
       dockerfile: ./Dockerfile
@@ -43,7 +44,7 @@ services:
       - go_echo
   db_pg:
     container_name: db_pg
-    image: jump_in_pg
+    image: jump_in-db_pg
     build:
       context: ./pg
       dockerfile: ./Dockerfile

@@ -133,8 +133,9 @@ node_modules
 # dotenv file
 .env
 
-# test runner
+# scripts
 /go/run_test.sh
+build_image.sh
 
 # orm
 /go/sqlboiler.toml
