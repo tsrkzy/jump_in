@@ -35,6 +35,8 @@ CREATE TABLE event (
     id             BIGSERIAL                NOT NULL
         PRIMARY KEY,
     name           VARCHAR(100)             NOT NULL,
+    description    VARCHAR(1000)            NOT NULL DEFAULT '',
+    is_open        bool                     NOT NULL DEFAULT FALSE,
     account_id     BIGSERIAL                NOT NULL REFERENCES account(id) ON DELETE SET NULL,
     event_group_id BIGSERIAL                REFERENCES event_group(id) ON DELETE SET NULL,
     created_at     TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
@@ -82,6 +84,7 @@ CREATE TABLE attend (
         REFERENCES account(id) ON DELETE CASCADE,
     event_id   BIGSERIAL                NOT NULL
         REFERENCES event(id) ON DELETE CASCADE,
+    comment    VARCHAR(30)              NOT NULL DEFAULT '',
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     UNIQUE (account_id, event_id)
@@ -102,17 +105,16 @@ CREATE TABLE candidate (
 
 DROP TABLE IF EXISTS vote CASCADE;
 CREATE TABLE vote (
-    id         BIGSERIAL                NOT NULL
+    id           BIGSERIAL                NOT NULL
         PRIMARY KEY,
-    account_id BIGSERIAL                NOT NULL
+    account_id   BIGSERIAL                NOT NULL
         REFERENCES account(id) ON DELETE CASCADE,
-    event_id   BIGSERIAL                NOT NULL
-        REFERENCES event(id) ON DELETE CASCADE,
-    open_at    CHAR(12)                 NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    CONSTRAINT uk_vote_account_id_event_id_vote_at
-        UNIQUE (account_id, event_id, open_at)
+    candidate_id BIGSERIAL                NOT NULL
+        REFERENCES candidate(id) ON DELETE CASCADE,
+    created_at   TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    updated_at   TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    CONSTRAINT uk_vote_account_id_candidate_id
+        UNIQUE (account_id, candidate_id)
 );
 
 

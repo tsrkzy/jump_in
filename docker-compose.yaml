@@ -1,22 +1,14 @@
-# ##########################################
-# MEMO
-#
-# volumes:
-#  - /sys/fs/cgroup:/sys/fs/cgroup:ro
-# tty: true
-# privileged: true
-#
-# amazonlinux2 で/sbin/initが起動せず、systemdがdockerfileから触れない対策
-# ##########################################
 version: "3.9"
 services:
   go_echo:
-    image: jump_in_echo
     container_name: go_echo
-    build: ./go
+    build:
+      context: ./go
+      dockerfile: ./Dockerfile
     ports:
-      - "80:80"
+      - "8080:8080"
     environment:
+      - HTTP_SCHEME_HOSTNAME_PORT
       - PG_DB_USER
       - PG_DB_PASS
       - PG_INSTANCE_HOST
@@ -27,19 +19,34 @@ services:
       - SESSION_VAR_NAME
       - SMTP_SERVER_NAME
       - SMTP_SERVER_PORT
+      - SMTP_SERVER_MAIL_ADDRESS
       - SMTP_SERVER_PASSWORD
+      - SMTP_SERVER_MAILER_NAME
     volumes:
       - ./go:/usr/src/app
-      - ./svelte/dist:/var/www/dist
-      - ./go/docker:/var/www/docker
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
-    tty: true
-    privileged: true
+  go_nginx:
+    container_name: go_nginx
+    image: jump_in_go_nginx
+    build:
+      context: ./svelte
+      dockerfile: ./Dockerfile
+    volumes:
+      - ./svelte/templates:/etc/nginx/templates
+      - ./svelte/dist:/var/www/
+    ports:
+      - "80:80"
+    environment:
+      - NGINX_HOST
+      - NGINX_PORT
+      - API_HOST
+    depends_on:
+      - go_echo
   db_pg:
-#    image: postgres:14
-    image: jump_in_pg
-    build: ./pg
     container_name: db_pg
+    image: jump_in_pg
+    build:
+      context: ./pg
+      dockerfile: ./Dockerfile
     ports:
       - "5432:5432"
     environment:

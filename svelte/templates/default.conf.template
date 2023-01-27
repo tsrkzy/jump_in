@@ -1,0 +1,27 @@
+
+server {
+    listen ${NGINX_PORT};
+    server_name ${NGINX_HOST};
+    charset utf-8;
+    root /var/www;
+    index index.html;
+
+   location /api {
+       proxy_pass ${API_HOST};
+#       proxy_set_header X-Forwarded-Host $host;
+   }
+
+    location ~ (.+\.js)$ {
+        try_files /assets/$1 /$1 =404;
+    }
+    location ~ (.+\.css)$ {
+        try_files /assets/$1 /$1 =404;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html =404;
+    }
+
+    # post body size limit
+    client_max_body_size 16m;
+}

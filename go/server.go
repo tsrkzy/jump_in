@@ -6,12 +6,13 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
-	"github.com/tsrkzy/jump_in/authenticate"
-	"github.com/tsrkzy/jump_in/cx"
-	"github.com/tsrkzy/jump_in/event"
+	"github.com/tsrkzy/jump_in/handler/account_handler"
+	"github.com/tsrkzy/jump_in/handler/authenticate_handler"
+	"github.com/tsrkzy/jump_in/handler/candidate_handler"
+	"github.com/tsrkzy/jump_in/handler/event_handler"
 	"github.com/tsrkzy/jump_in/helper"
-	"github.com/tsrkzy/jump_in/response"
-	"github.com/tsrkzy/jump_in/validate"
+	"github.com/tsrkzy/jump_in/helper/cx"
+	"github.com/tsrkzy/jump_in/helper/validate"
 	"net/http"
 	"os"
 	"time"
@@ -58,45 +59,48 @@ func main() {
 	sName := helper.MustGetenv("SESSION_NAME")
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte(sName))))
 
-	/* routing */
-	/* 認証不要 - ログインのためのAPI */
-	e.POST("/api/authenticate", authenticate.Authenticate())
-	e.GET("/api/ml/:uri_hash", authenticate.MagicLink())
-	/* ログアウトはログオフ中でも可能 */
-	e.GET("/api/logout", authenticate.Logout())
+	/* ************
+	 * routing    *
+	 * ************/
 
-	/* ログインが必要 */
-	e.GET("/api/status", au(authenticate.Status()))
-	e.GET("/api/whoami", au(authenticate.WhoAmI()))
+	/* --- 認証不要 --- */
+
+	/* - ログインのためのAPI */
+	e.POST("/api/authenticate", authenticate_handler.Authenticate())
+	e.GET("/api/ml/:uri_hash", authenticate_handler.MagicLink())
+	/* ログアウトはログオフ中でも可能 */
+	e.GET("/api/logout", authenticate_handler.Logout())
+
+	/* --- 認証必要 --- */
+
+	e.GET("/api/status", authenticate_handler.Au(authenticate_handler.Status()))
+
+	/* アカウント情報 */
+	e.GET("/api/whoami", authenticate_handler.Au(authenticate_handler.WhoAmI()))
+	e.POST("/api/account/name/update", authenticate_handler.Au(account_handler.UpdateName()))
 
 	/* イベント */
-	e.GET("/api/event/list", au(event.List()))
-	e.GET("/api/event/detail", au(event.Detail()))
-	e.POST("/api/event/create", au(event.Create()))
-	e.POST("/api/event/name/update", au(event.UpdateName()))
-	e.POST("/api/event/candidate/update", au(event.UpdateCandidate()))
+	e.GET("/api/event/list", authenticate_handler.Au(event_handler.List()))
+	e.GET("/api/event/detail", authenticate_handler.Au(event_handler.Detail()))
+	e.POST("/api/event/create", authenticate_handler.Au(event_handler.Create()))
+	e.POST("/api/event/name/update", authenticate_handler.Au(event_handler.UpdateName()))
+	e.POST("/api/event/description/update", authenticate_handler.Au(event_handler.UpdateDescription()))
+	e.POST("/api/event/open/update", authenticate_handler.Au(event_handler.UpdateOpen()))
+
+	/* 候補日 */
+	e.POST("/api/candidate/create", authenticate_handler.Au(candidate_handler.Create()))
+	e.POST("/api/candidate/delete", authenticate_handler.Au(candidate_handler.Delete()))
+
+	/* 投票 */
+	e.POST("/api/vote/create", authenticate_handler.Au(candidate_handler.Upvote()))
+	e.POST("/api/vote/delete", authenticate_handler.Au(candidate_handler.Downvote()))
 
 	/* 参加/離脱 */
-	e.POST("/api/event/attend", au(event.Attend()))
-	e.POST("/api/event/leave", au(event.Leave()))
+	e.POST("/api/event/attend", authenticate_handler.Au(event_handler.Attend()))
+	e.POST("/api/event/leave", authenticate_handler.Au(event_handler.Leave()))
 
 	/* start listening */
 	if err := e.Start(":" + port); err != http.ErrServerClosed {
 		log.Fatal(err)
-	}
-}
-
-// au
-// API(HandlerFunc)の呼び出しにログイン認証をかける
-// ログイン済みならそのまま Handler を処理
-// 未ログインなら 401 Unauthorized で応答
-func au(f echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		err := authenticate.Authorized(c)
-		if err != nil {
-			return c.JSON(http.StatusUnauthorized, response.ErrorGen("ログインが必要です"))
-		}
-
-		return f(c)
 	}
 }

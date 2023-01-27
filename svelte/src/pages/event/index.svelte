@@ -1,10 +1,8 @@
 <script>
   import Anchor from "../../component/Anchor.svelte";
-  import LoginButton from "../../component/LoginButton.svelte";
-  import LogoffButton from "../../component/LogoffButton.svelte";
+  import Links from "../../component/Links.svelte";
   import { syncAuth } from "../../store/auth";
-  import { callAPI } from "../../tool/callApi";
-  import { getAccountID } from "../../tool/storage";
+  import { getEventList } from "../../tool/callRestAPI";
 
   let eventsOwns = [];
   let eventsJoins = [];
@@ -12,9 +10,7 @@
 
   syncAuth()
     .then(() => {
-      const account_id = getAccountID();
-
-      return callAPI("/event/list", "GET", { query: { account_id } })
+      return getEventList()
         .then(r => {
           const {
             events_owns = [],
@@ -29,33 +25,45 @@
 </script>
 
 <div>
-  <LogoffButton></LogoffButton>
-  <LoginButton></LoginButton>
-  <Anchor href="/auth" label="auth"></Anchor>
-  <Anchor href="/event/new" label="new event"></Anchor>
-  <h3>event</h3>
-  <h4>my event</h4>
-  <ul>
-    {#each eventsOwns as e}
-      <li>
-        <Anchor href="/event/{e.id}" label={e.name}></Anchor>
-      </li>
-    {/each}
-  </ul>
-  <h4>joined event</h4>
-  <ul>
-    {#each eventsJoins as e}
-      <li>
-        <Anchor href="/event/{e.id}" label={e.name}></Anchor>
-      </li>
-    {/each}
-  </ul>
-  <h4>event onboard</h4>
-  <ul>
-    {#each eventsRunning as e}
-      <li>
-        <Anchor href="/event/{e.id}" label={e.name}></Anchor>
-      </li>
-    {/each}
-  </ul>
+  <Links></Links>
+  <h3>イベント一覧</h3>
+  <h4>自分が作成したイベント</h4>
+  {#if eventsOwns.length === 0}
+    <p>(なし)</p>
+  {:else }
+    <ul>
+      {#each eventsOwns as e}
+        <li>
+          <span>(X人参加中)</span>
+          <Anchor href="/event/{e.id}" label={e.name}></Anchor>
+        </li>
+      {/each}
+    </ul>
+  {/if}
+  <h4>参加中のイベント</h4>
+  {#if eventsJoins.length === 0}
+    <p>(なし)</p>
+  {:else }
+    <ul>
+      {#each eventsJoins as e}
+        <li>
+          <span>(X人参加中)</span>
+          <Anchor href="/event/{e.id}" label={e.name}></Anchor>
+        </li>
+      {/each}
+    </ul>
+  {/if}
+  <h4>募集中のイベント</h4>
+  {#if eventsRunning.length === 0}
+    <p>(なし)</p>
+  {:else }
+    <ul>
+      {#each eventsRunning as e}
+        <li>
+          <span>(X人参加中)</span>
+          <Anchor href="/event/{e.id}" label={e.name}></Anchor>
+        </li>
+      {/each}
+    </ul>
+  {/if}
 </div>

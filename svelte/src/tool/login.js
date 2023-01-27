@@ -8,6 +8,7 @@ import {
 export const EMAIL_FOR_DEV = "tsrmix+jump_in@gmail.com";
 
 /**
+ * **開発用API**
  * マジックリンクメール送信APIの開発用レスポンスからマジックリンクを取得
  * マジックリンクへ遷移してログイン完了
  * ログイン状態になる

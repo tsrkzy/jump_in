@@ -3,7 +3,7 @@
   import CButton from "./CButton.svelte";
   import {
     dateToYYYYMMDDhhmm
-  } from "./date";
+  } from "../tool/date";
 
   const hours = [{ value: null, label: "未選択" },
     ...Array(12).fill(0).map((_, _i) => {
@@ -37,13 +37,12 @@
 
   function onClickAddCandidate() {
     console.log("AddCandidate.onClickAddCandidate");
-    const checked = true;
     const d = new Date(openDate);
     d.setHours(openTime);
     const openAt = dateToYYYYMMDDhhmm(d);
 
-    const candidate = { id: null, openAt, checked };
-    dispatch("add_candidates", { candidates: [candidate] });
+    const candidate = { openAt };
+    dispatch("add_candidate", { candidate });
   }
 </script>
 
@@ -56,5 +55,5 @@
       {/each}
     </select>
   </label>
-  <CButton disabled="{!openTime || !openDate}" value="Add Candidate" on:click={onClickAddCandidate}></CButton>
+  <CButton disabled="{!openTime || !openDate}" value="候補日を追加" on:click={onClickAddCandidate}></CButton>
 </div>

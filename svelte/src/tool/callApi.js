@@ -28,9 +28,10 @@ export async function callAPI(uri, method = "GET", data = {}) {
     body: bodyJsonStr,
     headers
   };
-  const endpoint = `http://localhost:80/api${uri}${queryString}`;
+  const schemeAndDomain = import.meta.env.VITE_HTTP_SCHEME_HOSTNAME_PORT;
+  const endpoint = `${schemeAndDomain}/api${uri}${queryString}`;
   return fetch(endpoint, init).then(r => {
-    console.log(r.ok, r.status);
+      console.log(r.ok, r.status);
       if (r.ok) {
         /* サーバから2XXで応答があった */
         return r.json();

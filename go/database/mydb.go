@@ -12,7 +12,8 @@ import (
 )
 
 func Open() (*MyDB, error) {
-	return (&MyDB{}).Connect()
+	mydb, err := (&MyDB{}).Connect()
+	return mydb, err
 }
 
 type MyDB struct {
@@ -74,6 +75,10 @@ func (d *MyDB) Tx(ctx context.Context, txFunc func(*sql.Tx) error) error {
 	}
 
 	defer func() {
+		/* -- DEBUG -- */
+		d.Stats()
+		/* -- /DEBUG -- */
+
 		if p := recover(); p != nil {
 			/* func Transaction で panic が発生したらそのまま外にpanicで流す */
 			log.Error(p)
@@ -95,4 +100,26 @@ func (d *MyDB) Tx(ctx context.Context, txFunc func(*sql.Tx) error) error {
 	err = txFunc(tx)
 
 	return err
+}
+
+// Stats
+// デバッグ用。
+func (d *MyDB) Stats() {
+	MaxOpenConnections := d.db.Stats().MaxOpenConnections // Maximum number of open connections to the database.
+	OpenConnections := d.db.Stats().OpenConnections       // The number of established connections both in use and idle.
+	InUse := d.db.Stats().InUse                           // The number of connections currently in use.
+	Idle := d.db.Stats().Idle                             // The number of idle connections.
+
+	fmt.Printf(` -- DB stats
+MaxOpenConnections: %d
+OpenConnections   : %d
+InUse             : %d
+Idle              : %d
+`,
+		MaxOpenConnections,
+		OpenConnections,
+		InUse,
+		Idle,
+	)
+
 }

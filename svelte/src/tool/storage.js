@@ -32,6 +32,11 @@ function parseAuthCache() {
   return JSON.parse(acJson);
 }
 
+/**
+ * アカウントIDの取得
+ * syncAuthの実行前は、現在のセッションとlocalStorageが同期されていないので注意
+ * @returns {string}
+ */
 export function getAccountID() {
   const { accountId } = parseAuthCache();
   return accountId;

@@ -133,6 +133,13 @@ node_modules
 # dotenv file
 .env
 
+# test runner
+/go/run_test.sh
+
 # orm
 /go/sqlboiler.toml
 /go/models/
+
+# air
+/go/bin/
+/go/tmp/
