@@ -14,7 +14,6 @@
   import AddCandidate from "../../../component/AddCandidate.svelte";
   import DownvoteCandidateButton from "../../../component/DownvoteCandidateButton.svelte";
   import DropCandidateButton from "../../../component/DropCandidateButton.svelte";
-  import Links from "../../../component/Links.svelte";
   import UpvoteCandidateButton from "../../../component/UpvoteCandidateButton.svelte";
   import {
     auth,
@@ -53,6 +52,9 @@
 
   /* イベントの作成者とログイン中のアカウントIDが等しい */
   $: isOwner = accountId === event.accountId;
+
+  /* イベントに参加している */
+  $: isParticipant = event.participants.findIndex(p => p.account.id === accountId) !== -1;
 
   /* イベントの主催者ではなく、かつイベントが公開中でない */
   $: hidden = (!isOwner) && event.is_open !== true;
@@ -94,7 +96,7 @@
     const candidates = _candidates.map(c => ({
       id: c.id,
       openAt: c.open_at,
-      votes: c.votes
+      votes: c.votes.filter(v => participants.findIndex(p => p.account.id === v.account.id) !== -1)
     }));
 
     /* 編集用 */
@@ -102,6 +104,7 @@
     let participant = participants.find(p => p.account.id === accountId) || {};
     const { attend: att = {} } = participant;
     newComment = att.comment || "参加します！";
+
 
     event.name = name;
     event.is_open = is_open;
@@ -263,32 +266,6 @@
     {:else }
       <pre><code>{event.description}</code></pre>
     {/if}
-
-    <h5>候補日時</h5>
-    {#if event.candidates.length === 0}
-      <p>日付と開始時刻を設定して、候補日を追加</p>
-    {:else}
-      <div>
-        {#each event.candidates as c}
-          <p>{dateToLocalString(YYYYMMDDHHIItoDate(c.openAt))}
-            {#each c.votes as v}
-              <span>★{v.account.name}</span>
-            {/each}
-          </p>
-          {#if isOwner}
-            <DropCandidateButton candidate_id="{c.id}" on:drop_candidate={dropCandidate}></DropCandidateButton>
-          {/if}
-          {#if c.votes.findIndex(v => v.account_id === accountId) !== -1}
-            <DownvoteCandidateButton candidate_id="{c.id}" on:downvote_candidate={downvoteCandidate}></DownvoteCandidateButton>
-          {:else}
-            <UpvoteCandidateButton candidate_id="{c.id}" on:upvote_candidate={upvoteCandidate}></UpvoteCandidateButton>
-          {/if}
-        {/each}
-      </div>
-    {/if}
-    {#if isOwner}
-      <AddCandidate on:add_candidate={addCandidate}></AddCandidate>
-    {/if}
     <h5>参加者</h5>
     <ul>
       {#each event.participants as p }
@@ -299,11 +276,41 @@
         {/if}
       {/each}
     </ul>
-    {#if event.participants.findIndex(p => p.account.id === accountId) !== -1}
-      <CButton value="取り下げる" on:click={onClickLeave}></CButton>
+    {#if isParticipant}
+      <CButton value="不参加にする" on:click={onClickLeave}></CButton>
     {:else }
       <CButton primary value="参加する" on:click={onClickAttend}></CButton>
       <p>参加する場合は、ボタンを押して意思表示</p>
+    {/if}
+
+    <h5>候補日時</h5>
+    {#if event.candidates.length === 0}
+      <p>日付と開始時刻を設定して、候補日を追加</p>
+    {:else}
+      <div>
+        {#each event.candidates as c}
+          <p>{dateToLocalString(YYYYMMDDHHIItoDate(c.openAt))}
+            {#if c.votes.length === event.participants.length}
+              <span>全員が参加可能</span>
+            {:else if c.votes.length !== 0}
+              <span>{c.votes.length}人が参加可能</span>
+            {:else}
+              <span></span>
+            {/if}
+            {#if c.votes.findIndex(v => v.account_id === accountId) !== -1}
+              <DownvoteCandidateButton disabled="{!isParticipant}" candidate_id="{c.id}" on:downvote_candidate={downvoteCandidate}></DownvoteCandidateButton>
+            {:else}
+              <UpvoteCandidateButton disabled="{!isParticipant}" candidate_id="{c.id}" on:upvote_candidate={upvoteCandidate}></UpvoteCandidateButton>
+            {/if}
+            {#if isOwner}
+              <DropCandidateButton candidate_id="{c.id}" on:drop_candidate={dropCandidate}></DropCandidateButton>
+            {/if}
+          </p>
+        {/each}
+      </div>
+    {/if}
+    {#if isOwner}
+      <AddCandidate on:add_candidate={addCandidate}></AddCandidate>
     {/if}
   {/if}
 

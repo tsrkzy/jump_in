@@ -1,11 +1,11 @@
 <script context="module">
   export function load({ params }) {
     const {
-      candidate_id,
+      candidate_id, disabled
     } = params;
     return {
       props: {
-        candidate_id,
+        candidate_id, disabled
       }
     };
   }
@@ -14,6 +14,7 @@
   import { createEventDispatcher } from "svelte";
 
   export let candidate_id = "";
+  export let disabled = false;
 
   const dispatch = createEventDispatcher();
 
@@ -22,4 +23,4 @@
     dispatch("upvote_candidate", { candidate: { id: candidate_id } });
   }
 </script>
-<span><input type="button" value="投票" on:click={upvoteCandidate}/></span>
+<span><input class="button-primary" type="button" value="投票" disabled="{disabled}" on:click={upvoteCandidate}/></span>
