@@ -1,15 +1,15 @@
 
 server {
-    listen ${NGINX_PORT};
-    server_name ${NGINX_HOST};
+    listen 80;
+    server_name _;
     charset utf-8;
     root /var/www;
     index index.html;
 
-   location /api {
-       proxy_pass ${API_HOST};
+    location /api {
+        proxy_pass ${API_ORIGIN}/api;
 #       proxy_set_header X-Forwarded-Host $host;
-   }
+    }
 
     location ~ (.+\.js)$ {
         try_files /assets/$1 /$1 =404;

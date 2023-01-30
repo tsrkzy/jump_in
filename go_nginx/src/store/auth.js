@@ -43,7 +43,8 @@ export function syncAuth() {
     headers
   };
 
-  const endpoint = `http://localhost:80/api/whoami`;
+  const { protocol, hostname } = location;
+  const endpoint = `${protocol}//${hostname}:80/api/whoami`;
   return fetch(endpoint, init)
     .then(r => {
       if (r.ok) {

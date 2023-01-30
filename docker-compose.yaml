@@ -4,7 +4,7 @@ services:
     container_name: go_echo
     image: jump_in-go_echo
     build:
-      context: ./go
+      context: ./go_echo
       dockerfile: ./Dockerfile
     ports:
       - "8080:8080"
@@ -24,29 +24,27 @@ services:
       - SMTP_SERVER_PASSWORD
       - SMTP_SERVER_MAILER_NAME
     volumes:
-      - ./go:/usr/src/app
+      - ./go_echo:/usr/src/app
   go_nginx:
     container_name: go_nginx
     image: jump_in-go_nginx
     build:
-      context: ./svelte
+      context: ./go_nginx
       dockerfile: ./Dockerfile
     volumes:
-      - ./svelte/templates:/etc/nginx/templates
-      - ./svelte/dist:/var/www/
+      - ./go_nginx/templates:/etc/nginx/templates
+      - ./go_nginx/dist:/var/www/
     ports:
       - "80:80"
     environment:
-      - NGINX_HOST
-      - NGINX_PORT
-      - API_HOST
+      - API_ORIGIN
     depends_on:
       - go_echo
   db_pg:
     container_name: db_pg
     image: jump_in-db_pg
     build:
-      context: ./pg
+      context: ./db_pg
       dockerfile: ./Dockerfile
     ports:
       - "5432:5432"

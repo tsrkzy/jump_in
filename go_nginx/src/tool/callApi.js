@@ -7,7 +7,7 @@ import { flushAuthCache } from "./storage";
  * 401: ローカルストレージの認証情報キャッシュクリアして /auth へリダイレクト、一応 throw して Reject
  * 4XX、5XX: http status text で Reject
  *
- * @param {string} uri - http://localhost:80/api 以降のパスを指定
+ * @param {string} uri - protocol:/hostname:port/api 以降のパスを指定
  * @param {"GET"|"POST"} method
  * @param {{body?: Object,query?: Object, isUri?: boolean }} data - オブジェクトでquery: query param, body: post body用のデータを渡すといい感じにする
  * @returns {Promise<Object>}
@@ -28,8 +28,11 @@ export async function callAPI(uri, method = "GET", data = {}) {
     body: bodyJsonStr,
     headers
   };
-  const schemeAndDomain = import.meta.env.VITE_HTTP_SCHEME_HOSTNAME_PORT;
-  const endpoint = `${schemeAndDomain}/api${uri}${queryString}`;
+  console.log("7!!!!!!!!!!!!!!!!!"); // @DELETEME
+  console.log(init); // @DELETEME
+  const { protocol, hostname } = location;
+  const endpoint = `${protocol}//${hostname}:80/api${uri}${queryString}`;
+  console.log(endpoint); // @DELETEME
   return fetch(endpoint, init).then(r => {
       console.log(r.ok, r.status);
       if (r.ok) {

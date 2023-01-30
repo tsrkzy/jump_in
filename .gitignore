@@ -132,15 +132,16 @@ node_modules
 
 # dotenv file
 .env
+.env.prod
 
 # scripts
-/go/run_test.sh
-build_image.sh
+/go_echo/run_test.sh
 
 # orm
-/go/sqlboiler.toml
-/go/models/
+/go_echo/sqlboiler.toml
+/go_echo/models/
 
 # air
-/go/bin/
-/go/tmp/
+/go_echo/bin/
+/go_echo/tmp/
+/push_docker_image.sh
