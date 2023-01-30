@@ -5,7 +5,7 @@
     dateToYYYYMMDDhhmm
   } from "../tool/date";
 
-  const hours = [{ value: null, label: "未選択" },
+  const hours = [{ value: null, label: "開始時刻" },
     ...Array(12).fill(0).map((_, _i) => {
       /* 09 ... 21 */
       const i = _i + 9;

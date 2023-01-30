@@ -1,6 +1,5 @@
 <script>
   import Anchor from "../../component/Anchor.svelte";
-  import Links from "../../component/Links.svelte";
   import { syncAuth } from "../../store/auth";
   import { getEventList } from "../../tool/callRestAPI";
 
@@ -25,42 +24,37 @@
 </script>
 
 <div>
-  <Links></Links>
-  <h3>イベント一覧</h3>
-  <h4>自分が作成したイベント</h4>
+  <h5>自分が作成したイベント</h5>
   {#if eventsOwns.length === 0}
     <p>(なし)</p>
   {:else }
     <ul>
       {#each eventsOwns as e}
         <li>
-          <span>(X人参加中)</span>
           <Anchor href="/event/{e.id}" label={e.name}></Anchor>
         </li>
       {/each}
     </ul>
   {/if}
-  <h4>参加中のイベント</h4>
+  <h5>参加中のイベント</h5>
   {#if eventsJoins.length === 0}
     <p>(なし)</p>
   {:else }
     <ul>
       {#each eventsJoins as e}
         <li>
-          <span>(X人参加中)</span>
           <Anchor href="/event/{e.id}" label={e.name}></Anchor>
         </li>
       {/each}
     </ul>
   {/if}
-  <h4>募集中のイベント</h4>
+  <h5>募集中のイベント</h5>
   {#if eventsRunning.length === 0}
     <p>(なし)</p>
   {:else }
     <ul>
       {#each eventsRunning as e}
         <li>
-          <span>(X人参加中)</span>
           <Anchor href="/event/{e.id}" label={e.name}></Anchor>
         </li>
       {/each}

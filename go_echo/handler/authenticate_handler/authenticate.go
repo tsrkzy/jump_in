@@ -80,8 +80,13 @@ func Authenticate() echo.HandlerFunc {
 				}
 
 				/* メール送信 */
-				schemeAndOrigin := helper.MustGetenv("HTTP_SCHEME_HOSTNAME_PORT")
-				ml := schemeAndOrigin + "/api/ml/" + uriHash
+				redirectUri := r.RedirectURI
+
+				redirectOrigin, err := helper.ExtractOriginFromURI(redirectUri)
+				if err != nil {
+					return err
+				}
+				ml := redirectOrigin + "/api/ml/" + uriHash
 				m := mail.Content{
 					MailTo:  mailAddress,
 					NameTo:  "JumpIn参加者様",

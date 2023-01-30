@@ -30,12 +30,14 @@
     leave,
     updateEventDescription,
     updateEventIsOpen,
+    updateEventName,
     upvote
   } from "../../../tool/callRestAPI";
 
   let accountId = null;
-  let newComment = "参加します！";
+  let newComment = "";
   let textarea = "";
+  let eventName = "";
   export let event_id = "";
   let event = {
     name: "",
@@ -94,6 +96,12 @@
       openAt: c.open_at,
       votes: c.votes
     }));
+
+    /* 編集用 */
+    eventName = name;
+    let participant = participants.find(p => p.account.id === accountId) || {};
+    const { attend: att = {} } = participant;
+    newComment = att.comment || "参加します！";
 
     event.name = name;
     event.is_open = is_open;
@@ -200,6 +208,14 @@
     return `${yyyy}/${mm}/${dd} (${youbi}) ${hh}:${ii}`;
   }
 
+  function onClickUpdateEventName() {
+    const name = eventName.trim();
+    console.log("index.onClickUpdateEventName");
+    return updateEventName(event_id, name).then(r => {
+      setEvent(r);
+    });
+  }
+
   function onClickUpdateDescription() {
     const description = textarea.trim();
     console.log("index.onClickUpdateDescription", description);
@@ -210,28 +226,35 @@
 </script>
 
 <div>
-  <Links></Links>
   {#if accountId === null}
     <p>読込中……</p>
   {:else if hidden}
     <p>このイベントは、主催者がまだ公開していません。</p>
   {:else}
-    <h3>イベント名: {event.name}</h3>
     {#if isOwner}
-      <h4>状態</h4>
+      <h5>イベント名</h5>
+      <input type="text" bind:value={eventName}>
+      <input type="button" value="変更" on:click={onClickUpdateEventName}>
+    {:else}
+      <h4>{event.name}</h4>
+    {/if}
+    {#if isOwner}
       {#if event.is_open}
-        <p>公開中！</p>
+        <p>現在イベントは<u>公開中</u>で、誰でも見れます</p>
       {:else }
-        <p>まだ非公開です</p>
+        <p>現在イベントは<u>非公開</u>で、あなたにしか見えません</p>
       {/if}
       {#if event.is_open}
-        <CButton value="[管理用]非公開にする" on:click={onClickEventClose}></CButton>
+        <CButton primary value="非公開にする" on:click={onClickEventClose}></CButton>
       {:else }
-        <CButton value="[管理用]公開する" on:click={onClickEventOpen}></CButton>
+        <CButton primary value="公開する" on:click={onClickEventOpen}></CButton>
       {/if}
     {/if}
-    <h4>主催者: {event.owner.name}</h4>
-    <h3>説明</h3>
+    {#if !isOwner}
+      <h5>主催者</h5>
+      <p>{event.owner.name}</p>
+    {/if}
+    <h5>説明</h5>
     {#if isOwner}
       <div>
         <textarea bind:value={textarea} rows="25" cols="33"></textarea>
@@ -241,27 +264,32 @@
       <pre><code>{event.description}</code></pre>
     {/if}
 
-    <h3>候補日時</h3>
-    <ul>
-      {#each event.candidates as c}
-        <li>{dateToLocalString(YYYYMMDDHHIItoDate(c.openAt))}
+    <h5>候補日時</h5>
+    {#if event.candidates.length === 0}
+      <p>日付と開始時刻を設定して、候補日を追加</p>
+    {:else}
+      <div>
+        {#each event.candidates as c}
+          <p>{dateToLocalString(YYYYMMDDHHIItoDate(c.openAt))}
+            {#each c.votes as v}
+              <span>★{v.account.name}</span>
+            {/each}
+          </p>
           {#if isOwner}
             <DropCandidateButton candidate_id="{c.id}" on:drop_candidate={dropCandidate}></DropCandidateButton>
           {/if}
-          <UpvoteCandidateButton candidate_id="{c.id}" on:upvote_candidate={upvoteCandidate}></UpvoteCandidateButton>
-          <DownvoteCandidateButton candidate_id="{c.id}" on:downvote_candidate={downvoteCandidate}></DownvoteCandidateButton>
-          <ul>
-            {#each c.votes as v}
-              <li>{v.account.name} {v.account_id}</li>
-            {/each}
-          </ul>
-        </li>
-      {/each}
-    </ul>
+          {#if c.votes.findIndex(v => v.account_id === accountId) !== -1}
+            <DownvoteCandidateButton candidate_id="{c.id}" on:downvote_candidate={downvoteCandidate}></DownvoteCandidateButton>
+          {:else}
+            <UpvoteCandidateButton candidate_id="{c.id}" on:upvote_candidate={upvoteCandidate}></UpvoteCandidateButton>
+          {/if}
+        {/each}
+      </div>
+    {/if}
     {#if isOwner}
       <AddCandidate on:add_candidate={addCandidate}></AddCandidate>
     {/if}
-    <h3>参加者</h3>
+    <h5>参加者</h5>
     <ul>
       {#each event.participants as p }
         {#if p.account.id === accountId}
@@ -274,7 +302,8 @@
     {#if event.participants.findIndex(p => p.account.id === accountId) !== -1}
       <CButton value="取り下げる" on:click={onClickLeave}></CButton>
     {:else }
-      <CButton value="参加する" on:click={onClickAttend}></CButton>
+      <CButton primary value="参加する" on:click={onClickAttend}></CButton>
+      <p>参加する場合は、ボタンを押して意思表示</p>
     {/if}
   {/if}
 

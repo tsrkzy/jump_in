@@ -47,6 +47,13 @@ export function downvote(event_id, candidate_id) {
   return callAPI("/vote/delete", "POST", data);
 }
 
+export function updateEventName(event_id, name) {
+  const account_id = getAccountID();
+  const body = { event_id, account_id, name };
+  const data = { body };
+  return callAPI("/event/name/update", "POST", data);
+}
+
 export function updateEventDescription(event_id, description) {
   const account_id = getAccountID();
   const body = { event_id, account_id, description };
@@ -83,7 +90,7 @@ export function authenticate(mail_address) {
   return callAPI("/authenticate", "POST", data);
 }
 
-export function updateAccountName() {
+export function updateAccountName(accountNewName) {
   const account_id = getAccountID();
   const body = { account_id, name: accountNewName };
   const data = { body };

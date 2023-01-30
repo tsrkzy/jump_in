@@ -22,4 +22,4 @@
     dispatch("downvote_candidate", { candidate: { id: candidate_id } });
   }
 </script>
-<span><input type="button" value="不可" on:click={downvoteCandidate}/></span>
+<span><input type="button" value="取消" on:click={downvoteCandidate}/></span>

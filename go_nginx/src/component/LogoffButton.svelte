@@ -8,5 +8,5 @@
     loggedIn = !!v.accountId;
   });
 </script>
-<span>{#if loggedIn}<input type="button" value="logoff" on:click={logout}/>{/if}</span>
+<span>{#if loggedIn}<input type="button" value="ログオフする" on:click={logout}/>{/if}</span>
 

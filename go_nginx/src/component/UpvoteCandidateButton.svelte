@@ -22,4 +22,4 @@
     dispatch("upvote_candidate", { candidate: { id: candidate_id } });
   }
 </script>
-<span><input type="button" value="行ける" on:click={upvoteCandidate}/></span>
+<span><input type="button" value="投票" on:click={upvoteCandidate}/></span>

@@ -1,9 +1,9 @@
 <script context="module">
   export function load({ params }) {
-    const { value, disabled } = params;
+    const { primary, value, disabled } = params;
     return {
       props: {
-        value, disabled
+        primary, value, disabled
       }
     };
   }
@@ -13,6 +13,7 @@
 <script>
   import { createEventDispatcher } from "svelte";
 
+  export let primary = false;
   export let value = "";
   export let disabled = false;
   const dispatch = createEventDispatcher();
@@ -22,6 +23,7 @@
   }
 </script>
 <input type="button"
+       class:button-primary={primary}
        value="{value}"
        disabled="{disabled}"
        on:click={onClick}/>

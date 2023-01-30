@@ -2,4 +2,30 @@
 
 html {
   font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+
+  details {
+    background-color: ghostwhite;
+    border-radius: 0.5rem;
+    padding: 1rem;
+
+    summary {
+    }
+  }
+
+  input[type=date] {
+    padding: 1rem;
+    border: 1px solid lightgray;
+    border-radius: 0.5rem;
+  }
+
+  input[type=button]:disabled {
+    color: gray;
+    cursor: not-allowed;
+
+    &:hover {
+      color: gray;
+      border-color: lightgray;
+      cursor: not-allowed;
+    }
+  }
 }

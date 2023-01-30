@@ -9,7 +9,6 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - HTTP_SCHEME_HOSTNAME_PORT
       - PG_DB_USER
       - PG_DB_PASS
       - PG_INSTANCE_HOST
