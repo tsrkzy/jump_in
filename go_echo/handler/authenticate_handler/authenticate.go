@@ -43,6 +43,8 @@ func Authenticate() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, response_types.Errors{})
 		}
 
+		m := mail.Content{}
+
 		ar := authenticate_types.Result{}
 		ctx := context.Background()
 		/* open DB Tx */
@@ -87,14 +89,11 @@ func Authenticate() echo.HandlerFunc {
 					return err
 				}
 				ml := redirectOrigin + "/api/ml/" + uriHash
-				m := mail.Content{
+				m = mail.Content{
 					MailTo:  mailAddress,
 					NameTo:  "JumpIn参加者様",
 					Subject: "JumpIn 認証用マジックリンク",
 					Body:    ml,
-				}
-				if err := mail.SendMailSSL(&m); err != nil {
-					return err
 				}
 
 				/* response */
@@ -116,6 +115,10 @@ func Authenticate() echo.HandlerFunc {
 				return c.JSON(es.Code, response_types.ErrorGen(es.Msg))
 			}
 			return c.JSON(http.StatusInternalServerError, response_types.Errors{})
+		}
+
+		if err = mail.SendMailSSL(&m); err != nil {
+			return c.JSON(http.StatusInternalServerError, response_types.ErrorGen("メール送信に失敗しました"))
 		}
 
 		return c.JSON(http.StatusOK, ar)

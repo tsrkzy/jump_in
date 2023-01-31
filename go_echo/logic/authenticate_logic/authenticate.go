@@ -54,7 +54,7 @@ func CreateInvitation(ctx *context.Context, tx *sql.Tx, invitation *models.Invit
 		lg.Debugf("mail_account_id: %d", ma.ID)
 	}
 
-	invitation.MailAccountID = ma.AccountID
+	invitation.MailAccountID = ma.ID
 
 	err = invitation.Insert(*ctx, tx, boil.Infer())
 	return err
