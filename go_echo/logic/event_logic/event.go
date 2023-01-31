@@ -176,7 +176,7 @@ func getCandidates(ctx context.Context, tx *sql.Tx, eventId string) ([]entity.Ca
 	return cList, nil
 }
 
-func getParticipants(ctx context.Context, tx *sql.Tx, eventId string) ([]entity.Participants, error) {
+func getParticipants(ctx context.Context, tx *sql.Tx, eventId string) ([]entity.Participant, error) {
 	attendList, err := models.Attends(qm.Where("event_id = ?", eventId)).All(ctx, tx)
 	if err != nil {
 		return nil, err
@@ -197,18 +197,32 @@ func getParticipants(ctx context.Context, tx *sql.Tx, eventId string) ([]entity.
 	return participants, nil
 }
 
-func accountsToParticipants(accounts []entity.Account, attends models.AttendSlice) []entity.Participants {
+func getConsents(ctx context.Context, tx *sql.Tx, eventId string) ([]entity.Consent, error) {
+	consentList, err := models.Consents(qm.Where("event_id = ?", eventId)).All(ctx, tx)
+	if err != nil {
+		return nil, err
+	}
+
+	consents := make([]entity.Consent, 0)
+	for _, c := range consentList {
+		consents = append(consents, *entity.CreateConsent(c))
+	}
+
+	return consents, nil
+}
+
+func accountsToParticipants(accounts []entity.Account, attends models.AttendSlice) []entity.Participant {
 
 	attendMap := make(map[int64]*entity.Attend, 0)
 	for _, a := range attends {
 		attendMap[a.AccountID] = entity.CreateAttend(a)
 	}
 
-	participants := make([]entity.Participants, 0)
+	participants := make([]entity.Participant, 0)
 	for i := range accounts {
 		account := &accounts[i]
 		att := attendMap[account.Account.ID]
-		p := entity.CreateParticipants(account, att)
+		p := entity.CreateParticipant(account, att)
 		participants = append(participants, *p)
 	}
 
@@ -257,6 +271,11 @@ func GetDetail(ctx context.Context, tx *sql.Tx, eventId string) (*entity.EventDe
 		return nil, err
 	}
 
+	consents, err := getConsents(ctx, tx, eventId)
+	if err != nil {
+		return nil, err
+	}
+
 	ee := entity.CreateEvent(e)
 
 	dr := &entity.EventDetail{
@@ -264,6 +283,7 @@ func GetDetail(ctx context.Context, tx *sql.Tx, eventId string) (*entity.EventDe
 		Candidates:   candidates,
 		Owner:        owner,
 		Participants: participants,
+		Consents:     consents,
 	}
 
 	return dr, nil

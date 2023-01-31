@@ -139,6 +139,8 @@ CREATE TABLE Consent (
         PRIMARY KEY,
     administrator_id BIGSERIAL                NOT NULL
         REFERENCES administrator(id) ON DELETE NO ACTION,
+    account_id       BIGSERIAL                NOT NULL
+        REFERENCES account(id) ON DELETE NO ACTION,
     event_id         BIGSERIAL                NOT NULL
         REFERENCES event(id) ON DELETE NO ACTION,
     message          VARCHAR(2000)            NOT NULL DEFAULT '',

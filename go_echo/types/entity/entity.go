@@ -115,13 +115,13 @@ func CreateEvent(e *models.Event) *Event {
 	return &event
 }
 
-type Participants struct {
+type Participant struct {
 	Attend  Attend  `json:"attend"`
 	Account Account `json:"account"`
 }
 
-func CreateParticipants(a *Account, att *Attend) *Participants {
-	p := &Participants{
+func CreateParticipant(a *Account, att *Attend) *Participant {
+	p := &Participant{
 		Attend:  *att,
 		Account: *a,
 	}
@@ -129,9 +129,28 @@ func CreateParticipants(a *Account, att *Attend) *Participants {
 	return p
 }
 
+type Consent struct {
+	ID              string `json:"id"`
+	AdministratorId string `json:"administrator_id"`
+	AccountId       string `json:"account_id"`
+	EventId         string `json:"event_id"`
+	models.Consent
+}
+
+func CreateConsent(c *models.Consent) *Consent {
+	consent := Consent{Consent: *c}
+	consent.ID = fmt.Sprintf("%d", consent.Consent.ID)
+	consent.AdministratorId = fmt.Sprintf("%d", consent.Consent.AdministratorID)
+	consent.AccountId = fmt.Sprintf("%d", consent.Consent.AccountID)
+	consent.EventId = fmt.Sprintf("%d", consent.Consent.EventID)
+
+	return &consent
+}
+
 type EventDetail struct {
 	Event
-	Candidates   []Candidate    `json:"candidates"`
-	Owner        Account        `json:"owner"`
-	Participants []Participants `json:"participants"`
+	Candidates   []Candidate   `json:"candidates"`
+	Owner        Account       `json:"owner"`
+	Participants []Participant `json:"participants"`
+	Consents     []Consent     `json:"consents"`
 }

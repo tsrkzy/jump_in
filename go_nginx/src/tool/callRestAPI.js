@@ -130,3 +130,17 @@ export async function certifyEvent(event_id) {
   const data = { body };
   return callAPI("/admin/event/certify", "POST", data);
 }
+
+export async function createConsent(event_id, message) {
+  const account_id = getAccountID();
+  const body = { account_id, event_id, message };
+  const data = { body };
+  return callAPI("/admin/event/consent/create", "POST", data);
+}
+
+export async function acceptConsent(event_id, consent_id) {
+  const account_id = getAccountID();
+  const body = { account_id, event_id, consent_id };
+  const data = { body };
+  return callAPI("/event/consent/accept", "POST", data);
+}

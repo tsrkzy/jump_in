@@ -12,6 +12,7 @@
 
 <script>
   import AddCandidate from "../../../component/AddCandidate.svelte";
+  import Consent from "../../../component/Consent.svelte";
   import DownvoteCandidateButton from "../../../component/DownvoteCandidateButton.svelte";
   import DropCandidateButton from "../../../component/DropCandidateButton.svelte";
   import UpvoteCandidateButton from "../../../component/UpvoteCandidateButton.svelte";
@@ -21,9 +22,11 @@
   } from "../../../store/auth";
   import CButton from "../../../component/CButton.svelte";
   import {
+    acceptConsent,
     attend,
     certifyEvent,
     createCandidate,
+    createConsent,
     deleteCandidate,
     downvote,
     getDetail,
@@ -40,6 +43,8 @@
   let newComment = "";
   let textarea = "";
   let eventName = "";
+  let consentText = "";
+
   export let event_id = "";
   let event = {
     name: "",
@@ -51,6 +56,7 @@
     owner: {},
     participants: [],
     candidates: [],
+    consents: [],
   };
 
   /* イベントの作成者とログイン中のアカウントIDが等しい */
@@ -93,6 +99,7 @@
       , owner
       , participants = []
       , candidates: _candidates = []
+      , consents = []
     } = _event;
 
     /* イベント説明を更新 */
@@ -121,6 +128,7 @@
     event.owner = owner;
     event.participants = participants;
     event.candidates = candidates;
+    event.consents = consents;
   }
 
   function addCandidate(e) {
@@ -246,6 +254,21 @@
       setEvent(r);
     });
   }
+
+  function onAcceptConsent(e) {
+    const { consent_id } = e.detail;
+    console.log("index.onClickConsent", consent_id);
+    acceptConsent(event_id, consent_id).then(r => {
+      setEvent(r);
+    });
+  }
+
+  function onClickCreateConsent() {
+    console.log("index.onClickCreateConsent", consentText);
+    createConsent(event_id, consentText).then(r => {
+      setEvent(r);
+    });
+  }
 </script>
 
 <div>
@@ -254,6 +277,28 @@
   {:else if hidden && !adminId}
     <p>このイベントは、主催者がまだ公開していません。</p>
   {:else}
+    {#if adminId}
+      <h5>同意書</h5>
+      <textarea bind:value={consentText}></textarea>
+      <input type="button" value="作成" on:click={onClickCreateConsent}>
+    {/if}
+    {#if (isOwner || adminId) && event.consents.length !== 0}
+      <details>
+        <summary>同意書</summary>
+        {#if event.consents.filter(c => !c.accepted).length !== 0}
+          <h5>同意待ち</h5>
+        {/if}
+        {#each event.consents.filter(c => !c.accepted) as c}
+          <Consent accepted="{false}" is_owner="{isOwner}" consent_id="{c.id}" message="{c.message.trim()}" on:accept_consent={onAcceptConsent}></Consent>
+        {/each}
+        {#if event.consents.filter(c => c.accepted).length !== 0}
+          <h5>同意済み</h5>
+        {/if}
+        {#each event.consents.filter(c => c.accepted) as c}
+          <Consent accepted="{true}" is_owner="{isOwner}" consent_id="{c.id}" message="{c.message.trim()}" on:accept_consent={onAcceptConsent}></Consent>
+        {/each}
+      </details>
+    {/if}
     {#if isOwner}
       <h5>イベント名</h5>
       <input type="text" bind:value={eventName}>

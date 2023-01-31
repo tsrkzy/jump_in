@@ -10,6 +10,7 @@ import (
 	"github.com/tsrkzy/jump_in/handler/admin_handler"
 	"github.com/tsrkzy/jump_in/handler/authenticate_handler"
 	"github.com/tsrkzy/jump_in/handler/candidate_handler"
+	"github.com/tsrkzy/jump_in/handler/consent_handler"
 	"github.com/tsrkzy/jump_in/handler/event_handler"
 	"github.com/tsrkzy/jump_in/helper"
 	"github.com/tsrkzy/jump_in/helper/cx"
@@ -79,9 +80,9 @@ func main() {
 
 	/*  - 管理者 - */
 	/* 同意書 */
-	//e.POST("/api/admin/consent/create", admin_handler.Ad(consent_handler.Create()))
-	//e.POST("/api/admin/consent/update", admin_handler.Ad(consent_handler.Update()))
-	//e.POST("/api/admin/consent/delete", admin_handler.Ad(consent_handler.Delete()))
+	e.POST("/api/admin/event/consent/create", admin_handler.Ad(consent_handler.Create()))
+	//e.POST("/api/admin/event/consent/update", admin_handler.Ad(consent_handler.Update()))
+	//e.POST("/api/admin/event/consent/delete", admin_handler.Ad(consent_handler.Delete()))
 	/* イベント */
 	e.POST("/api/admin/event/certify", admin_handler.Ad(event_handler.Certify()))
 
@@ -100,7 +101,7 @@ func main() {
 	e.POST("/api/event/open/update", authenticate_handler.Au(event_handler.UpdateOpen()))
 
 	/* 同意書 */
-	//e.POST("/api/event/consent/accept", authenticate_handler.Au(consent_handler.AcceptConsent()))
+	e.POST("/api/event/consent/accept", authenticate_handler.Au(consent_handler.Accept()))
 
 	/* 候補日 */
 	e.POST("/api/candidate/create", authenticate_handler.Au(candidate_handler.Create()))
