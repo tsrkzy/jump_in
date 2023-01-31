@@ -266,8 +266,8 @@ func WhoAmI() echo.HandlerFunc {
 
 		ctx := context.Background()
 		err = myDB.Tx(ctx, func(tx *sql.Tx) error {
-			return sess.Open(c, myDB, func(session *sessions.Session) error {
-				a, _, err := authenticate_logic.GetAccountFromChocoChip(session, ctx, tx)
+			return sess.Open(c, myDB, func(s *sessions.Session) error {
+				a, _, _admin, err := authenticate_logic.GetAccountFromChocoChip(s, ctx, tx)
 				if err != nil {
 					return err
 				}
@@ -281,9 +281,18 @@ func WhoAmI() echo.HandlerFunc {
 					maList = append(maList, *entity.CreateMailAccount(ma))
 				}
 
+				admin := &entity.Administrator{}
+				if _admin != nil {
+					lg.Debug("got admin")
+					admin = entity.CreateAdministrator(_admin)
+				} else {
+					lg.Debug("got no admin")
+				}
+
 				wr = &authenticate_types.WhoAmIResponse{
-					Account:      *entity.CreateAccount(a),
-					MailAccounts: maList,
+					Account:       *entity.CreateAccount(a),
+					Administrator: *admin,
+					MailAccounts:  maList,
 				}
 				helper.Mask(wr)
 
@@ -342,4 +351,26 @@ func authorized(c echo.Context) error {
 	} else {
 		return nil
 	}
+}
+
+// Ad
+// API(HandlerFunc)の呼び出しに管理者権限の認証をかける
+// Auと一緒
+func Ad(f echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		err := isAdmin(c)
+		if err != nil {
+			return c.JSON(http.StatusUnauthorized, response_types.ErrorGen("管理者ログインが必要です"))
+		}
+
+		return f(c)
+	}
+}
+
+func isAdmin(c echo.Context) error {
+
+	/* chocochipでInvitationとAdminが取得できるか */
+	/* Invitationがauthorizedであること */
+	/* Invitationがexpiredでないこと */
+	return nil
 }

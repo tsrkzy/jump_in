@@ -20,7 +20,7 @@ func MakeClient(MLHttpResponse *resty.Response) *resty.Client {
 }
 
 func Login(t *testing.T, email string) (*resty.Response, authenticate_types.WhoAmIResponse, error) {
-	redirectUri := "http://localhost:80/api/status"
+	redirectUri := "http://localhost:80/api/whoami"
 	r := authenticate_types.Request{
 		MailAddress: email,
 		RedirectURI: redirectUri,

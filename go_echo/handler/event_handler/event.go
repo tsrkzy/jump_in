@@ -53,7 +53,7 @@ func List() echo.HandlerFunc {
 		err = myDB.Tx(ctx, func(tx *sql.Tx) error {
 			return sess.Open(c, myDB, func(s *sessions.Session) error {
 				/* セッションストアからアカウントを取得 */
-				a, _, err := authenticate_logic.GetAccountFromChocoChip(s, ctx, tx)
+				a, _, _, err := authenticate_logic.GetAccountFromChocoChip(s, ctx, tx)
 				if err != nil {
 					return err
 				}
@@ -192,7 +192,7 @@ func Create() echo.HandlerFunc {
 		err = myDB.Tx(ctx, func(tx *sql.Tx) error {
 			return sess.Open(c, myDB, func(s *sessions.Session) error {
 				/* セッションストアからアカウントIDを逆引き */
-				a, _, err := authenticate_logic.GetAccountFromChocoChip(s, ctx, tx)
+				a, _, _, err := authenticate_logic.GetAccountFromChocoChip(s, ctx, tx)
 				if err != nil {
 					return err
 				}
@@ -452,7 +452,7 @@ func Attend() echo.HandlerFunc {
 			return sess.Open(c, myDB, func(session *sessions.Session) error {
 
 				/* セッションからアカウントIDを取得 */
-				a, _, err := authenticate_logic.GetAccountFromChocoChip(session, ctx, tx)
+				a, _, _, err := authenticate_logic.GetAccountFromChocoChip(session, ctx, tx)
 				if err != nil {
 					return err
 				}
@@ -544,7 +544,7 @@ func Leave() echo.HandlerFunc {
 			return sess.Open(c, myDB, func(session *sessions.Session) error {
 
 				/* セッションからアカウントIDを取得 */
-				a, _, err := authenticate_logic.GetAccountFromChocoChip(session, ctx, tx)
+				a, _, _, err := authenticate_logic.GetAccountFromChocoChip(session, ctx, tx)
 				if err != nil {
 					return err
 				}

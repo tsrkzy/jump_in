@@ -52,7 +52,7 @@ func UpdateName() echo.HandlerFunc {
 		err = myDB.Tx(ctx, func(tx *sql.Tx) error {
 			return sess.Open(c, myDB, func(s *sessions.Session) error {
 				/* セッションストアからアカウントを取得 */
-				a, _, err := authenticate_logic.GetAccountFromChocoChip(s, ctx, tx)
+				a, _, _, err := authenticate_logic.GetAccountFromChocoChip(s, ctx, tx)
 				if err != nil {
 					return err
 				}

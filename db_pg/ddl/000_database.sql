@@ -36,6 +36,7 @@ CREATE TABLE event (
         PRIMARY KEY,
     name           VARCHAR(100)             NOT NULL,
     description    VARCHAR(1000)            NOT NULL DEFAULT '',
+    certified      bool                     NOT NULL DEFAULT FALSE,
     is_open        bool                     NOT NULL DEFAULT FALSE,
     account_id     BIGSERIAL                NOT NULL REFERENCES account(id) ON DELETE SET NULL,
     event_group_id BIGSERIAL                REFERENCES event_group(id) ON DELETE SET NULL,
@@ -118,23 +119,30 @@ CREATE TABLE vote (
 );
 
 
-DROP TABLE IF EXISTS event_create_mail CASCADE;
-CREATE TABLE event_create_mail (
-    id         BIGSERIAL                NOT NULL
+DROP TABLE IF EXISTS administrator CASCADE;
+CREATE TABLE administrator (
+    id            BIGSERIAL                NOT NULL
         PRIMARY KEY,
-    event_id   BIGSERIAL                NOT NULL
-        REFERENCES event(id) ON DELETE CASCADE,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+    account_id    BIGSERIAL                NOT NULL
+        REFERENCES account(id) ON DELETE NO ACTION,
+    invitation_id BIGSERIAL                NOT NULL
+        REFERENCES invitation(id) ON DELETE SET NULL,
+    created_at    TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    updated_at    TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    CONSTRAINT uk_administrator_account_id_invitation_id
+        UNIQUE (account_id, invitation_id)
 );
 
-DROP TABLE IF EXISTS event_announce_mail CASCADE;
-CREATE TABLE event_announce_mail (
-    id         BIGSERIAL                NOT NULL
+DROP TABLE IF EXISTS Consent CASCADE;
+CREATE TABLE Consent (
+    id               BIGSERIAL                NOT NULL
         PRIMARY KEY,
-    event_id   BIGSERIAL                NOT NULL
-        REFERENCES event(id) ON DELETE CASCADE,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+    administrator_id BIGSERIAL                NOT NULL
+        REFERENCES administrator(id) ON DELETE NO ACTION,
+    event_id         BIGSERIAL                NOT NULL
+        REFERENCES event(id) ON DELETE NO ACTION,
+    message          VARCHAR(2000)            NOT NULL DEFAULT '',
+    accepted         bool                     NOT NULL DEFAULT FALSE,
+    created_at       TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    updated_at       TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-

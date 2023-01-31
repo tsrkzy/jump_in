@@ -28,11 +28,8 @@ export async function callAPI(uri, method = "GET", data = {}) {
     body: bodyJsonStr,
     headers
   };
-  console.log("7!!!!!!!!!!!!!!!!!"); // @DELETEME
-  console.log(init); // @DELETEME
   const { protocol, hostname } = location;
   const endpoint = `${protocol}//${hostname}:80/api${uri}${queryString}`;
-  console.log(endpoint); // @DELETEME
   return fetch(endpoint, init).then(r => {
       console.log(r.ok, r.status);
       if (r.ok) {

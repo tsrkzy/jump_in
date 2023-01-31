@@ -59,7 +59,7 @@ func Create() echo.HandlerFunc {
 			return sess.Open(c, myDB, func(s *sessions.Session) error {
 
 				/* セッションストアからアカウントを取得 */
-				a, _, err := authenticate_logic.GetAccountFromChocoChip(s, ctx, tx)
+				a, _, _, err := authenticate_logic.GetAccountFromChocoChip(s, ctx, tx)
 				if err != nil {
 					return err
 				}
@@ -154,7 +154,7 @@ func Delete() echo.HandlerFunc {
 			return sess.Open(c, myDB, func(s *sessions.Session) error {
 
 				/* セッションストアからアカウントを取得 */
-				a, _, err := authenticate_logic.GetAccountFromChocoChip(s, ctx, tx)
+				a, _, _, err := authenticate_logic.GetAccountFromChocoChip(s, ctx, tx)
 				if err != nil {
 					return err
 				}
@@ -252,7 +252,7 @@ func Upvote() echo.HandlerFunc {
 			return sess.Open(c, myDB, func(s *sessions.Session) error {
 
 				/* セッションストアからアカウントを取得 */
-				a, _, err := authenticate_logic.GetAccountFromChocoChip(s, ctx, tx)
+				a, _, _, err := authenticate_logic.GetAccountFromChocoChip(s, ctx, tx)
 				if err != nil {
 					return err
 				}
@@ -278,7 +278,7 @@ func Upvote() echo.HandlerFunc {
 				}
 				if exists {
 					/* 既に存在するなら何もしない */
-					lg.Debugf("vote already exists. candidate: %d, accound: %d", cId, accountId)
+					lg.Debugf("vote already exists. candidate: %d, account: %d", cId, accountId)
 				} else {
 					_, err := candidate_logic.CreateVote(ctx, tx, accountId, cId)
 					if err != nil {
@@ -349,7 +349,7 @@ func Downvote() echo.HandlerFunc {
 			return sess.Open(c, myDB, func(s *sessions.Session) error {
 
 				/* セッションストアからアカウントを取得 */
-				a, _, err := authenticate_logic.GetAccountFromChocoChip(s, ctx, tx)
+				a, _, _, err := authenticate_logic.GetAccountFromChocoChip(s, ctx, tx)
 				if err != nil {
 					return err
 				}

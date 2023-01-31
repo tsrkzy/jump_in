@@ -290,7 +290,7 @@
       <div>
         {#each event.candidates as c}
           <p>{dateToLocalString(YYYYMMDDHHIItoDate(c.openAt))}
-            {#if c.votes.length === event.participants.length}
+            {#if c.votes.length !== 0 && c.votes.length === event.participants.length}
               <span>全員が参加可能</span>
             {:else if c.votes.length !== 0}
               <span>{c.votes.length}人が参加可能</span>

@@ -18,6 +18,22 @@ func CreateAccount(a *models.Account) *Account {
 	return &account
 }
 
+type Administrator struct {
+	ID           string `json:"id"`
+	AccountID    string `json:"account_id"`
+	InvitationID string `json:"invitation_id"`
+	models.Administrator
+}
+
+func CreateAdministrator(a *models.Administrator) *Administrator {
+	admin := Administrator{Administrator: *a}
+	admin.ID = fmt.Sprintf("%d", admin.Administrator.ID)
+	admin.AccountID = fmt.Sprintf("%d", admin.Administrator.AccountID)
+	admin.InvitationID = fmt.Sprintf("%d", admin.Administrator.InvitationID)
+
+	return &admin
+}
+
 type Attend struct {
 	ID        string `json:"id"`
 	AccountID string `json:"account_id"`

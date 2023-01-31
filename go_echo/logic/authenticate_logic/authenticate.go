@@ -200,37 +200,43 @@ func ThrottleLimitCheck(ctx *context.Context, tx *sql.Tx, email string) error {
 	return nil
 }
 
-func GetAccountFromChocoChip(s *sessions.Session, ctx context.Context, tx *sql.Tx) (*models.Account, *models.MailAccount, error) {
+func GetAccountFromChocoChip(s *sessions.Session, ctx context.Context, tx *sql.Tx) (*models.Account, *models.MailAccount, *models.Administrator, error) {
 	lg.Debug("authenticate.go L204")
 	var (
-		ma *models.MailAccount
-		a  *models.Account
+		admin *models.Administrator
+		ma    *models.MailAccount
+		a     *models.Account
 	)
 	cc := s.Values[sess.SvNameChocochip()]
 	if cc == nil {
-		return a, ma, errors.New("choco_chip not found")
+		return a, ma, nil, errors.New("choco_chip not found")
 	}
 	chocoChip := cc.(string)
 	i, err := models.Invitations(qm.Where("choco_chip = ?", chocoChip)).One(ctx, tx)
 	if err != nil {
 		lg.Errorf("choco_chip is not found in invitation: %s", chocoChip)
-		return a, ma, err
+		return a, ma, nil, err
 	}
 	maId := i.MailAccountID
 	ma, err = models.MailAccounts(qm.Where("id = ?", maId)).One(ctx, tx)
 	if err != nil {
 		lg.Errorf("mail_account not found: %d", maId)
-		return a, ma, err
+		return a, ma, nil, err
 	}
 
 	aId := ma.AccountID
 	a, err = models.Accounts(qm.Where("id = ?", aId)).One(ctx, tx)
 	if err != nil {
 		lg.Errorf("account not found: %d", aId)
-		return a, ma, err
+		return a, ma, nil, err
 	}
 
-	return a, ma, nil
+	admin, err = models.Administrators(qm.Where("account_id = ? and invitation_id = ?", a.ID, i.ID)).One(ctx, tx)
+	if err != nil {
+		return a, ma, nil, nil
+	}
+
+	return a, ma, admin, nil
 }
 
 func InitInvitation(uriHash string, chocoChip string, realIP string, redirectURI string) models.Invitation {

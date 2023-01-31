@@ -36,7 +36,8 @@ type Result struct {
 
 type WhoAmIResponse struct {
 	entity.Account
-	MailAccounts []entity.MailAccount `json:"mail_accounts"`
+	Administrator entity.Administrator `json:"admin"`
+	MailAccounts  []entity.MailAccount `json:"mail_accounts"`
 }
 
 func (w *WhoAmIResponse) GetMailAccounts() []entity.MailAccount {

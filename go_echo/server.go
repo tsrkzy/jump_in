@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
 	"github.com/tsrkzy/jump_in/handler/account_handler"
+	"github.com/tsrkzy/jump_in/handler/admin_handler"
 	"github.com/tsrkzy/jump_in/handler/authenticate_handler"
 	"github.com/tsrkzy/jump_in/handler/candidate_handler"
 	"github.com/tsrkzy/jump_in/handler/event_handler"
@@ -73,7 +74,15 @@ func main() {
 
 	/* --- 認証必要 --- */
 
-	e.GET("/api/status", authenticate_handler.Au(authenticate_handler.Status()))
+	e.POST("/api/admin/login", authenticate_handler.Au(admin_handler.Login()))
+	e.POST("/api/admin/logout", authenticate_handler.Au(admin_handler.Logout()))
+
+	/*  - 管理者 - */
+	//e.POST("/api/admin/password/update", authenticate_handler.Ad(account_handler.UpdateName()))
+	//e.POST("/api/admin/consent/update", authenticate_handler.Ad(account_handler.UpdateName()))
+	//e.POST("/api/admin/event/certificate", authenticate_handler.Ad(account_handler.UpdateName()))
+
+	/*  - ユーザ - */
 
 	/* アカウント情報 */
 	e.GET("/api/whoami", authenticate_handler.Au(authenticate_handler.WhoAmI()))
@@ -86,6 +95,7 @@ func main() {
 	e.POST("/api/event/name/update", authenticate_handler.Au(event_handler.UpdateName()))
 	e.POST("/api/event/description/update", authenticate_handler.Au(event_handler.UpdateDescription()))
 	e.POST("/api/event/open/update", authenticate_handler.Au(event_handler.UpdateOpen()))
+	//e.POST("/api/event/consent/accept", authenticate_handler.Au(account_handler.AcceptConsent()))
 
 	/* 候補日 */
 	e.POST("/api/candidate/create", authenticate_handler.Au(candidate_handler.Create()))

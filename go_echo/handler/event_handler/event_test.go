@@ -89,7 +89,7 @@ func TestCreate001(t *testing.T) {
 
 func TestAttend001(t *testing.T) {
 	respMl, w, err := Login(t, DEFAULT_EMAIL)
-	accountId := fmt.Sprintf("%s", w.ID)
+	accountId := fmt.Sprintf("%s", w.Account.ID)
 	assert.NoError(t, err)
 
 	cEc := testhelper.MakeClient(respMl)
@@ -151,7 +151,7 @@ func TestAttend001(t *testing.T) {
 }
 
 func Login(t *testing.T, email string) (*resty.Response, authenticate_types.WhoAmIResponse, error) {
-	redirectUri := "http://localhost:80/api/status"
+	redirectUri := "http://localhost:80/api/whoami"
 	r := authenticate_types.Request{
 		MailAddress: email,
 		RedirectURI: redirectUri,

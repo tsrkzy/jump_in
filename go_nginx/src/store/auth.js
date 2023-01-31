@@ -54,14 +54,13 @@ export function syncAuth() {
           const {
             id: accountId,
             name: accountName,
-            mail_accounts = []
+            mail_accounts = [],
+            admin: { id: adminId } = {}
           } = json;
           const mailAccountIds = mail_accounts.map(ma => ma.id);
 
           /* LocalStorage */
-          const ac = createAuthCache();
-          ac.accountId = accountId;
-          ac.mailAccountIds = mailAccountIds;
+          const ac = createAuthCache(accountId, mailAccountIds, adminId);
 
           setAuthCache(ac);
 
@@ -69,12 +68,13 @@ export function syncAuth() {
           /* store */
           const mailAccounts = mail_accounts.map(m => ({
             id: m.id,
-            mailAddress: m.mail_address
+            mailAddress: m.mail_address,
           }));
           const a = {
             accountId,
             accountName,
             mailAccounts,
+            adminId
           };
 
           auth.set(a);

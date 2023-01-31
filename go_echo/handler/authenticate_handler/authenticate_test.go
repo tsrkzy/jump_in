@@ -16,7 +16,7 @@ const testDebug = false
 func TestAuthenticate000(t *testing.T) {
 	/* 不正なメールアドレスとURI */
 	email := "tsrmix+echogmail.com"
-	redirectUri := "http:/localhost:80/api/status"
+	redirectUri := "http:/localhost:80/api/whoami"
 	r := authenticate_types.Request{
 		MailAddress: email,
 		RedirectURI: redirectUri,
@@ -48,7 +48,7 @@ func TestAuthenticate001(t *testing.T) {
 
 	/* ログインしていないので401 */
 	cLS := resty.New().SetDebug(testDebug)
-	respLS, err := cLS.R().Get("http://localhost:80/api/status")
+	respLS, err := cLS.R().Get("http://localhost:80/api/whoami")
 	if err != nil {
 		return
 	}
@@ -56,7 +56,7 @@ func TestAuthenticate001(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, respLS.StatusCode())
 
 	email := "tsrmix+echo@gmail.com"
-	redirectUri := "http://localhost:80/api/status"
+	redirectUri := "http://localhost:80/api/whoami"
 	r := authenticate_types.Request{
 		MailAddress: email,
 		RedirectURI: redirectUri,
@@ -108,7 +108,7 @@ func TestAuthenticate002(t *testing.T) {
 	assert.Equal(t, http.StatusOK, respLo.StatusCode())
 
 	email := "tsrmix+echo@gmail.com"
-	redirectUri := "http://localhost:80/api/status"
+	redirectUri := "http://localhost:80/api/whoami"
 	r := authenticate_types.Request{
 		MailAddress: email,
 		RedirectURI: redirectUri,
@@ -143,7 +143,7 @@ func TestAuthenticate002(t *testing.T) {
 func TestAuthenticate003(t *testing.T) {
 	/* NG */
 	email := "tsrmix+echo@gmail.com"
-	redirectUri := "http://localhost:80/api/status"
+	redirectUri := "http://localhost:80/api/whoami"
 	r := authenticate_types.Request{
 		MailAddress: email,
 		RedirectURI: redirectUri,

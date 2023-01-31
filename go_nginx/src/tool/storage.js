@@ -4,8 +4,8 @@
 
 const AUTH_CACHE_KEY = "AUTH_CACHE_KEY";
 
-export function createAuthCache(accountId = null, mailAccountIds = []) {
-  return { accountId, mailAccountIds };
+export function createAuthCache(accountId = null, mailAccountIds = [], adminId = null) {
+  return { accountId, mailAccountIds, adminId };
 }
 
 
@@ -40,6 +40,16 @@ function parseAuthCache() {
 export function getAccountID() {
   const { accountId } = parseAuthCache();
   return accountId;
+}
+
+/**
+ * 管理者IDの取得
+ * syncAuthの実行前は、現在のセッションとlocalStorageが同期されていないので注意
+ * @returns {string}
+ */
+export function getAdminID() {
+  const { adminId } = parseAuthCache();
+  return adminId;
 }
 
 export function getMailAccountIDs() {
