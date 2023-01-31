@@ -181,3 +181,26 @@ func (r LeaveRequest) Validate() error {
 type LeaveResponse struct {
 	DetailResponse
 }
+
+type CertifyRequest struct {
+	EventID   string `json:"event_id"`
+	AccountID string `json:"account_id"`
+	Certify   bool   `json:"certify"`
+}
+
+func (r CertifyRequest) Validate() error {
+	return validation.ValidateStruct(&r,
+		validation.Field(
+			&r.EventID,
+			validation.Required.Error("イベントIDは必須です"),
+			is.Int,
+		), validation.Field(
+			&r.AccountID,
+			validation.Required.Error("アカウントIDは必須です"),
+		),
+	)
+}
+
+type CertifyResponse struct {
+	DetailResponse
+}

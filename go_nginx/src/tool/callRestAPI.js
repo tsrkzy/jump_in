@@ -114,3 +114,19 @@ export async function adminLogout() {
   const data = { body };
   return callAPI("/admin/logout", "POST", data).then(syncAuth);
 }
+
+export async function unCertifyEvent(event_id) {
+  const account_id = getAccountID();
+  const certify = false;
+  const body = { event_id, account_id, certify };
+  const data = { body };
+  return callAPI("/admin/event/certify", "POST", data);
+}
+
+export async function certifyEvent(event_id) {
+  const account_id = getAccountID();
+  const certify = true;
+  const body = { event_id, account_id, certify };
+  const data = { body };
+  return callAPI("/admin/event/certify", "POST", data);
+}

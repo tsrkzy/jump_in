@@ -589,3 +589,78 @@ func Leave() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, lr)
 	}
 }
+
+func Certify() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		r := &event_types.CertifyRequest{}
+		err := c.Bind(r)
+		if err != nil {
+			lg.Error(err)
+			return c.JSON(http.StatusBadRequest, response_types.Errors{})
+		}
+
+		/* validation */
+		if err := c.Validate(r); err != nil {
+			vErr := validate.ErrorIntoJson(err)
+			return c.JSON(http.StatusBadRequest, vErr)
+		}
+
+		eId, err := helper.StrToID(r.EventID)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, response_types.Errors{})
+		}
+		accountId, err := helper.StrToID(r.AccountID)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, response_types.Errors{})
+		}
+
+		/* db接続 */
+		myDB, err := database.Open()
+		if err != nil {
+			lg.Error(err)
+			return c.JSON(http.StatusInternalServerError, response_types.Errors{})
+		}
+
+		dr := &event_types.DetailResponse{}
+
+		ctx := context.Background()
+		err = myDB.Tx(ctx, func(tx *sql.Tx) error {
+			return sess.Open(c, myDB, func(session *sessions.Session) error {
+
+				/* セッションからアカウントIDを取得 */
+				a, _, _, err := authenticate_logic.GetAccountFromChocoChip(session, ctx, tx)
+				if err != nil {
+					return err
+				}
+
+				/* 認証先とリクエストのアカウントIDが異なったらNG */
+				if a.ID != accountId {
+					return response_types.NewErrorSeed(http.StatusUnauthorized, "認証に失敗しました")
+				}
+
+				_, err = event_logic.CertifyEvent(ctx, tx, eId, r.Certify)
+				if err != nil {
+					return err
+				}
+
+				/* 詳細作成 */
+				ed, err := event_logic.GetDetail(ctx, tx, r.EventID)
+				dr = &event_types.DetailResponse{EventDetail: *ed}
+
+				return nil
+			})
+		})
+
+		if err != nil {
+			if es, ok := err.(response_types.ErrorSeed); ok {
+				return c.JSON(es.Code, es.Msg)
+			}
+			lg.Error(err)
+			return c.JSON(http.StatusInternalServerError, response_types.Errors{})
+		}
+
+		cr := &event_types.CertifyResponse{*dr}
+
+		return c.JSON(http.StatusOK, cr)
+	}
+}

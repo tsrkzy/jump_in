@@ -8,8 +8,17 @@ html {
     border-radius: 0.5rem;
     padding: 1rem;
 
-    summary {
+    &.admin {
+      background-color: lemonchiffon;
     }
+
+    summary {
+      cursor: pointer;
+    }
+  }
+
+  u {
+    background-color: yellow;
   }
 
   input[type=date] {

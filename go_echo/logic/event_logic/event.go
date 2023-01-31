@@ -321,3 +321,14 @@ func UpdateEvent(ctx context.Context, tx *sql.Tx, e *models.Event) error {
 	_, err := e.Update(ctx, tx, boil.Infer())
 	return err
 }
+
+func CertifyEvent(ctx context.Context, tx *sql.Tx, eventId int64, certify bool) (int64, error) {
+	/* 認可予定の event を取得 */
+	e, err := FetchEventByID(ctx, tx, eventId)
+	if err != nil {
+		return 0, response_types.NewErrorSeed(http.StatusNotFound, fmt.Sprintf("イベントが存在しません: %d", eventId))
+	}
+	e.Certified = certify
+
+	return e.Update(ctx, tx, boil.Infer())
+}

@@ -83,7 +83,7 @@ func main() {
 	//e.POST("/api/admin/consent/update", admin_handler.Ad(consent_handler.Update()))
 	//e.POST("/api/admin/consent/delete", admin_handler.Ad(consent_handler.Delete()))
 	/* イベント */
-	//e.POST("/api/admin/event/certificate", admin_handler.Ad(event_handler.Certificate()))
+	e.POST("/api/admin/event/certify", admin_handler.Ad(event_handler.Certify()))
 
 	/*  - ユーザ - */
 

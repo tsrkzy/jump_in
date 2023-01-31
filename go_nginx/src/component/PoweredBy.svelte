@@ -4,7 +4,7 @@
 
 <div>
   <p>
-    <u>Jump In</u> is powered by <span><Anchor label="svelte"></Anchor>
+    "Jump In" is powered by <span><Anchor label="svelte"></Anchor>
     +
     <Anchor label="skeleton"></Anchor></span><br>
     <span>(c)

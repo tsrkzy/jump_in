@@ -22,11 +22,13 @@
   import CButton from "../../../component/CButton.svelte";
   import {
     attend,
+    certifyEvent,
     createCandidate,
     deleteCandidate,
     downvote,
     getDetail,
     leave,
+    unCertifyEvent,
     updateEventDescription,
     updateEventIsOpen,
     updateEventName,
@@ -34,6 +36,7 @@
   } from "../../../tool/callRestAPI";
 
   let accountId = null;
+  let adminId = null;
   let newComment = "";
   let textarea = "";
   let eventName = "";
@@ -62,8 +65,9 @@
   syncAuth().then(() => {
 
     auth.subscribe(a => {
-      const { accountId: aId } = a;
+      const { accountId: aId, adminId: _adminId } = a;
       accountId = aId;
+      adminId = _adminId;
     });
 
     return getDetail(event_id).then(r => {
@@ -81,6 +85,7 @@
     const {
       name
       , is_open
+      , certified
       , description
       , account_id
       , event_group_id
@@ -108,6 +113,7 @@
 
     event.name = name;
     event.is_open = is_open;
+    event.certified = certified;
     event.description = description;
     event.accountId = account_id;
     event.eventGroupId = event_group_id;
@@ -226,12 +232,26 @@
       setEvent(r);
     });
   }
+
+  function onClickUnCertify() {
+    console.log("index.onClickUnCertify");
+    unCertifyEvent(event_id).then(r => {
+      setEvent(r);
+    });
+  }
+
+  function onClickCertify() {
+    console.log("index.onClickCertify");
+    certifyEvent(event_id).then(r => {
+      setEvent(r);
+    });
+  }
 </script>
 
 <div>
   {#if accountId === null}
     <p>読込中……</p>
-  {:else if hidden}
+  {:else if hidden && !adminId}
     <p>このイベントは、主催者がまだ公開していません。</p>
   {:else}
     {#if isOwner}
@@ -241,11 +261,24 @@
     {:else}
       <h4>{event.name}</h4>
     {/if}
-    {#if isOwner}
+    <p>
+      {#if event.certified}
+        <u>開催許可済み</u>
+        {#if adminId}
+          <input type="button" value="許可取り下げ" on:click={onClickUnCertify}>
+        {/if}
+      {:else }
+        <u>開催申請中</u>
+        {#if adminId}
+          <input type="button" value="開催許可" on:click={onClickCertify}>
+        {/if}
+      {/if}
+    </p>
+    {#if isOwner || adminId}
       {#if event.is_open}
         <p>現在イベントは<u>公開中</u>で、誰でも見れます</p>
       {:else }
-        <p>現在イベントは<u>非公開</u>で、あなたにしか見えません</p>
+        <p>現在イベントは<u>非公開</u>で、主催者にしか見えません</p>
       {/if}
       {#if event.is_open}
         <CButton primary value="非公開にする" on:click={onClickEventClose}></CButton>
@@ -260,7 +293,7 @@
     <h5>説明</h5>
     {#if isOwner}
       <div>
-        <textarea bind:value={textarea} rows="25" cols="33"></textarea>
+        <textarea class="u-full-width" bind:value={textarea} rows="25" cols="33"></textarea>
       </div>
       <input type="button" value="説明を更新する" on:click={onClickUpdateDescription}>
     {:else }
@@ -284,8 +317,10 @@
     {/if}
 
     <h5>候補日時</h5>
-    {#if event.candidates.length === 0}
+    {#if isOwner && event.candidates.length === 0}
       <p>日付と開始時刻を設定して、候補日を追加</p>
+    {:else if event.candidates.length === 0}
+      <p>主催者が候補日を設定していないようです</p>
     {:else}
       <div>
         {#each event.candidates as c}
