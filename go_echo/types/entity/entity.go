@@ -130,19 +130,19 @@ func CreateParticipant(a *Account, att *Attend) *Participant {
 }
 
 type Consent struct {
-	ID              string `json:"id"`
-	AdministratorId string `json:"administrator_id"`
-	AccountId       string `json:"account_id"`
-	EventId         string `json:"event_id"`
+	ID             string `json:"id"`
+	AdminAccountID string `json:"admin_account_id"`
+	AccountID      string `json:"account_id"`
+	EventID        string `json:"event_id"`
 	models.Consent
 }
 
 func CreateConsent(c *models.Consent) *Consent {
 	consent := Consent{Consent: *c}
 	consent.ID = fmt.Sprintf("%d", consent.Consent.ID)
-	consent.AdministratorId = fmt.Sprintf("%d", consent.Consent.AdministratorID)
-	consent.AccountId = fmt.Sprintf("%d", consent.Consent.AccountID)
-	consent.EventId = fmt.Sprintf("%d", consent.Consent.EventID)
+	consent.AdminAccountID = fmt.Sprintf("%d", consent.Consent.AdminAccountID)
+	consent.AccountID = fmt.Sprintf("%d", consent.Consent.AccountID)
+	consent.EventID = fmt.Sprintf("%d", consent.Consent.EventID)
 
 	return &consent
 }

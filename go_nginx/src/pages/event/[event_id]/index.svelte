@@ -109,7 +109,7 @@
       id: c.id,
       openAt: c.open_at,
       votes: c.votes.filter(v => participants.findIndex(p => p.account.id === v.account.id) !== -1)
-    }));
+    })).sort((a, b) => a.openAt > b.openAt ? 1 : -1);
 
     /* 編集用 */
     eventName = name;
@@ -271,34 +271,41 @@
   }
 </script>
 
-<div>
-  {#if accountId === null}
-    <p>読込中……</p>
-  {:else if hidden && !adminId}
-    <p>このイベントは、主催者がまだ公開していません。</p>
-  {:else}
+{#if accountId === null}
+  <p>読込中……</p>
+{:else if hidden && !adminId}
+  <p>このイベントは、主催者がまだ公開していません。</p>
+{:else}
+  <div class="row">
+    <!-- 管理者→主催へ連絡 -->
     {#if adminId}
-      <h5>同意書</h5>
-      <textarea bind:value={consentText}></textarea>
-      <input type="button" value="作成" on:click={onClickCreateConsent}>
+      <h5>主催者へ連絡する</h5>
+      <textarea class="u-full-width" bind:value={consentText}></textarea>
+      <input type="button" class="admin" value="作成" on:click={onClickCreateConsent}>
     {/if}
     {#if (isOwner || adminId) && event.consents.length !== 0}
       <details>
-        <summary>同意書</summary>
+        <summary>メッセージ</summary>
         {#if event.consents.filter(c => !c.accepted).length !== 0}
-          <h5>同意待ち</h5>
+          <h5>承諾待ち</h5>
         {/if}
         {#each event.consents.filter(c => !c.accepted) as c}
           <Consent accepted="{false}" is_owner="{isOwner}" consent_id="{c.id}" message="{c.message.trim()}" on:accept_consent={onAcceptConsent}></Consent>
         {/each}
         {#if event.consents.filter(c => c.accepted).length !== 0}
-          <h5>同意済み</h5>
+          <h5>承諾済み</h5>
         {/if}
         {#each event.consents.filter(c => c.accepted) as c}
           <Consent accepted="{true}" is_owner="{isOwner}" consent_id="{c.id}" message="{c.message.trim()}" on:accept_consent={onAcceptConsent}></Consent>
         {/each}
       </details>
+      {#if event.consents.filter(c => !c.accepted).length !== 0}
+        <p><u>承諾待ちメッセージ</u>が{event.consents.filter(c => !c.accepted).length}件あります</p>
+      {/if}
     {/if}
+  </div>
+  <div class="row">
+    <!-- イベント名、申請状態、公開状態 -->
     {#if isOwner}
       <h5>イベント名</h5>
       <input type="text" bind:value={eventName}>
@@ -308,14 +315,14 @@
     {/if}
     <p>
       {#if event.certified}
-        <u>開催許可済み</u>
+        <u>開催決定！</u>
         {#if adminId}
-          <input type="button" value="許可取り下げ" on:click={onClickUnCertify}>
+          <input type="button" class="admin" value="許可取り下げ" on:click={onClickUnCertify}>
         {/if}
       {:else }
         <u>開催申請中</u>
         {#if adminId}
-          <input type="button" value="開催許可" on:click={onClickCertify}>
+          <input type="button" class="admin" value="開催許可" on:click={onClickCertify}>
         {/if}
       {/if}
     </p>
@@ -331,6 +338,9 @@
         <CButton primary value="公開する" on:click={onClickEventOpen}></CButton>
       {/if}
     {/if}
+  </div>
+  <div class="row">
+    <!-- イベント詳細情報 -->
     {#if !isOwner}
       <h5>主催者</h5>
       <p>{event.owner.name}</p>
@@ -344,6 +354,9 @@
     {:else }
       <pre><code>{event.description}</code></pre>
     {/if}
+  </div>
+  <div class="row">
+    <!-- 参加者 -->
     <h5>参加者</h5>
     <ul>
       {#each event.participants as p }
@@ -360,10 +373,12 @@
       <CButton primary value="参加する" on:click={onClickAttend}></CButton>
       <p>参加する場合は、ボタンを押して意思表示</p>
     {/if}
-
+  </div>
+  <div class="row">
+    <!-- 候補日時 -->
     <h5>候補日時</h5>
     {#if isOwner && event.candidates.length === 0}
-      <p>日付と開始時刻を設定して、候補日を追加</p>
+      <p><u>候補日を追加</u>してください</p>
     {:else if event.candidates.length === 0}
       <p>主催者が候補日を設定していないようです</p>
     {:else}
@@ -371,7 +386,7 @@
         {#each event.candidates as c}
           <p>{dateToLocalString(YYYYMMDDHHIItoDate(c.openAt))}
             {#if c.votes.length !== 0 && c.votes.length === event.participants.length}
-              <span>全員が参加可能</span>
+              <span><u>全員</u>が参加可能</span>
             {:else if c.votes.length !== 0}
               <span>{c.votes.length}人が参加可能</span>
             {:else}
@@ -392,6 +407,5 @@
     {#if isOwner}
       <AddCandidate on:add_candidate={addCandidate}></AddCandidate>
     {/if}
-  {/if}
-
-</div>
+  </div>
+{/if}

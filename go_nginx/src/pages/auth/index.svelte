@@ -96,10 +96,6 @@
   <div class="row">
     <div class="column">
       <input class="u-full-width" type="text" bind:value={accountNewName} placeholder={accountName}>
-    </div>
-  </div>
-  <div class="row">
-    <div class="column">
       <input type="button" value="表示名の変更" on:click={onClickUpdateAlias}>
     </div>
   </div>
@@ -117,7 +113,7 @@
   {:else }
     <div class="row">
       <div class="column">
-        <input type="button" value="管理者ログアウト" on:click={onClickAdminLogout}>
+        <input class="admin" type="button" value="管理者ログアウト" on:click={onClickAdminLogout}>
       </div>
     </div>
   {/if}

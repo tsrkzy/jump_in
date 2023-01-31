@@ -22,4 +22,4 @@
     dispatch("drop_candidate", { candidate: { id: candidate_id } });
   }
 </script>
-<span><input type="button" value="[管理用]削除" on:click={dropCandidate}/></span>
+<span><input type="button" value="削除" on:click={dropCandidate}/></span>

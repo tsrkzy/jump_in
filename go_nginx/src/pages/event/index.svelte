@@ -23,7 +23,7 @@
     });
 </script>
 
-<div>
+<div class="row">
   <h5>自分が作成したイベント</h5>
   {#if eventsOwns.length === 0}
     <p>(なし)</p>
@@ -36,6 +36,9 @@
       {/each}
     </ul>
   {/if}
+
+</div>
+<div class="row">
   <h5>参加中のイベント</h5>
   {#if eventsJoins.length === 0}
     <p>(なし)</p>
@@ -48,6 +51,8 @@
       {/each}
     </ul>
   {/if}
+</div>
+<div class="row">
   <h5>募集中のイベント</h5>
   {#if eventsRunning.length === 0}
     <p>(なし)</p>

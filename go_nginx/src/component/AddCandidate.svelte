@@ -46,13 +46,7 @@
   }
 </script>
 
-<div class="row">
-  <div class="column">
     <input type="date" value="{openDate}" on:change={onChangeOpenDate}>
-  </div>
-</div>
-<div class="row">
-  <div class="column">
     <label>
       <select on:change={onChangeOpenTime}>
         {#each hours as h}
@@ -60,6 +54,4 @@
         {/each}
       </select>
     </label>
-  </div>
-</div>
 <CButton disabled="{!openTime || !openDate}" value="候補日を追加" on:click={onClickAddCandidate}></CButton>

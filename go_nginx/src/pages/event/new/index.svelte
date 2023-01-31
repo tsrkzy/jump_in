@@ -39,7 +39,7 @@
 </script>
 
 <div>
-  <h3>イベント作成</h3>
+  <h5>イベント作成</h5>
   <div class="row">
     <div class="column">
       <input class="u-full-width" type="text" bind:value={eventName} placeholder="例: ボードゲーム大会">

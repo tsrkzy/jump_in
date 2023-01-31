@@ -123,10 +123,10 @@ DROP TABLE IF EXISTS administrator CASCADE;
 CREATE TABLE administrator (
     id            BIGSERIAL                NOT NULL
         PRIMARY KEY,
-    account_id    BIGSERIAL                NOT NULL
-        REFERENCES account(id) ON DELETE NO ACTION,
-    invitation_id BIGSERIAL                NOT NULL
-        REFERENCES invitation(id) ON DELETE SET NULL,
+    account_id    BIGSERIAL
+        REFERENCES account(id) ON DELETE CASCADE,
+    invitation_id BIGSERIAL
+        REFERENCES invitation(id) ON DELETE CASCADE,
     created_at    TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at    TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT uk_administrator_account_id_invitation_id
@@ -137,12 +137,12 @@ DROP TABLE IF EXISTS Consent CASCADE;
 CREATE TABLE Consent (
     id               BIGSERIAL                NOT NULL
         PRIMARY KEY,
-    administrator_id BIGSERIAL                NOT NULL
-        REFERENCES administrator(id) ON DELETE NO ACTION,
-    account_id       BIGSERIAL                NOT NULL
-        REFERENCES account(id) ON DELETE NO ACTION,
-    event_id         BIGSERIAL                NOT NULL
-        REFERENCES event(id) ON DELETE NO ACTION,
+    admin_account_id BIGSERIAL
+        REFERENCES account(id) ON DELETE CASCADE,
+    account_id       BIGSERIAL
+        REFERENCES account(id) ON DELETE CASCADE,
+    event_id         BIGSERIAL
+        REFERENCES event(id) ON DELETE CASCADE,
     message          VARCHAR(2000)            NOT NULL DEFAULT '',
     accepted         bool                     NOT NULL DEFAULT FALSE,
     created_at       TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),

@@ -10,14 +10,12 @@ import (
 	"github.com/tsrkzy/jump_in/helper"
 	"github.com/tsrkzy/jump_in/helper/validate"
 	"github.com/tsrkzy/jump_in/logic/authenticate_logic"
+	"github.com/tsrkzy/jump_in/logic/consent_logic"
 	"github.com/tsrkzy/jump_in/logic/event_logic"
 	"github.com/tsrkzy/jump_in/logic/lg"
-	"github.com/tsrkzy/jump_in/models"
 	"github.com/tsrkzy/jump_in/sess"
 	"github.com/tsrkzy/jump_in/types/consent_types"
 	"github.com/tsrkzy/jump_in/types/response_types"
-	"github.com/volatiletech/sqlboiler/v4/boil"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"net/http"
 )
 
@@ -82,15 +80,7 @@ func Create() echo.HandlerFunc {
 				/* イベントオーナー */
 				ownerId := e.AccountID
 
-				consent := models.Consent{
-					EventID:         eId,
-					AdministratorID: admin.ID,
-					AccountID:       ownerId,
-					Message:         message,
-					Accepted:        false,
-				}
-
-				err = consent.Insert(ctx, tx, boil.Infer())
+				err = consent_logic.InsertConsent(ctx, tx, eId, admin.AccountID, ownerId, message)
 				if err != nil {
 					return err
 				}
@@ -180,17 +170,13 @@ func Accept() echo.HandlerFunc {
 				}
 
 				/* 同意書 */
-				consent, err := models.Consents(qm.Where("id = ? and account_id = ? and event_id = ?",
-					consentId,
-					accountId,
-					e.ID)).One(ctx, tx)
+				consent, err := consent_logic.FetchConsentByUK(ctx, tx, consentId, accountId, e.ID)
 				if err != nil {
 					lg.Debugf("no consent found. id: %d, %d, %d", consentId, accountId, e.ID)
 					return err
 				}
 
-				consent.Accepted = true
-				_, err = consent.Update(ctx, tx, boil.Infer())
+				err = consent_logic.UpdateConsentAccepted(ctx, tx, consent)
 				if err != nil {
 					return err
 				}

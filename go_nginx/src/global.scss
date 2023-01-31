@@ -1,7 +1,38 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700&display=swap');
 
+// skeleton-cssのメインカラー 濃いめの明るい青
+$main-color: #33c3f0;
+
 html {
   font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+
+  h1, h2 {
+    border-left: 1rem solid aliceblue;
+    border-bottom: 2px solid $main-color;
+  }
+
+  h3 {
+    border-left: 1rem solid aliceblue;
+    border-bottom: 2px solid $main-color;
+  }
+
+  h4 {
+    border-left: 1rem solid aliceblue;
+    border-bottom: 1px dashed $main-color;
+  }
+
+  h5 {
+    border-left: 1rem solid aliceblue;
+    border-bottom: 1px dashed $main-color;
+  }
+
+  p {
+    border-bottom: 1px dashed whitesmoke;
+  }
+
+  div.row {
+    margin-bottom: 1rem;
+  }
 
   details {
     background-color: ghostwhite;
@@ -14,11 +45,17 @@ html {
 
     summary {
       cursor: pointer;
+
+    }
+
+    h1, h2, h3, h4, h5 {
+      border: none;
     }
   }
 
   u {
     background-color: yellow;
+    text-decoration: underline dotted lightgray;
   }
 
   input[type=date] {
@@ -31,21 +68,34 @@ html {
     color: gray;
     cursor: not-allowed;
 
-    &.button-primary {
-      color: lightcyan;
-      background-color: lightblue;
-      border-color: lightblue;
+    &:hover {
+      border-color: lightgray;
     }
+  }
+
+  input[type=button]:disabled.button-primary {
+    cursor: not-allowed;
+    color: lightcyan;
+    background-color: lightblue;
+    border-color: lightblue;
 
     &:hover {
-      color: gray;
-      border-color: lightgray;
-      cursor: not-allowed;
+      border-color: lightblue;
+    }
+  }
 
-      &.button-primary {
-        color: lightcyan;
-        background-color: lightblue;
-        border-color: lightblue;
+  input[type=button].admin {
+    color: white;
+    background-color: orange;
+
+    &:disabled {
+      cursor: not-allowed;
+      color: lightgray;
+      background-color: darkorange;
+      border-color: darkorange;
+
+      &:hover {
+        border-color: orangered;
       }
     }
   }
