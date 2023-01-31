@@ -2,24 +2,20 @@ package admin_handler
 
 import (
 	"context"
-	"crypto/sha256"
 	"database/sql"
 	"errors"
-	"fmt"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
 	"github.com/tsrkzy/jump_in/database"
 	"github.com/tsrkzy/jump_in/helper"
 	"github.com/tsrkzy/jump_in/helper/validate"
+	"github.com/tsrkzy/jump_in/logic/administrator_logic"
 	"github.com/tsrkzy/jump_in/logic/authenticate_logic"
 	"github.com/tsrkzy/jump_in/logic/lg"
-	"github.com/tsrkzy/jump_in/models"
 	"github.com/tsrkzy/jump_in/sess"
 	"github.com/tsrkzy/jump_in/types/admin_types"
 	"github.com/tsrkzy/jump_in/types/response_types"
-	"github.com/volatiletech/sqlboiler/v4/boil"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"net/http"
 )
 
@@ -71,31 +67,28 @@ func Login() echo.HandlerFunc {
 
 				/* chocochipでInvitationを取得 */
 				chocochip := s.Values[sess.SvNameChocochip()]
-				invitation, err := models.Invitations(qm.Where("choco_chip = ?", chocochip)).One(ctx, tx)
+				invitation, err := authenticate_logic.FetchInvitationByChocochip(ctx, tx, chocochip.(string))
 				if err != nil || invitation == nil {
 					return response_types.ErrorSeed{Code: http.StatusUnauthorized}
 				}
 
 				/* adminが既に存在するなら終了 */
-				admin, err := models.Administrators(qm.Where("account_id = ? and invitation_id = ?", accountId, invitation.ID)).One(ctx, tx)
+				admin, err := administrator_logic.FetchAdministratorByUK(ctx, tx, accountId, invitation.ID)
 				if err == nil && admin != nil {
 					return nil
 				}
+
 				/* pass_hashの突合 */
 				pass_hash := r.PassHash
 				pass := "fushianasan"
-				true_hash := fmt.Sprintf("%x", sha256.Sum256([]byte(pass)))
+				true_hash := helper.Sha256Digest(pass)
 				if pass_hash != true_hash {
 					lg.Debug("wrong password")
 					return response_types.ErrorSeed{Code: http.StatusBadRequest, Msg: "パスワードが異なります"}
 				}
 
 				/* adminにInsert */
-				admin = &models.Administrator{
-					AccountID:    accountId,
-					InvitationID: invitation.ID,
-				}
-				return admin.Insert(ctx, tx, boil.Infer())
+				return administrator_logic.InsertAdministrator(ctx, tx, accountId, invitation.ID)
 			})
 		})
 

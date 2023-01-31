@@ -256,3 +256,8 @@ func FetchMailAccountByID(ctx context.Context, tx *sql.Tx, a *models.Account) (m
 	mailAccounts, err := models.MailAccounts(qm.Where("account_id = ?", a.ID)).All(ctx, tx)
 	return mailAccounts, err
 }
+
+func FetchInvitationByChocochip(ctx context.Context, tx *sql.Tx, chocochip string) (*models.Invitation, error) {
+	invitation, err := models.Invitations(qm.Where("choco_chip = ?", chocochip)).One(ctx, tx)
+	return invitation, err
+}
