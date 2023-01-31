@@ -78,9 +78,12 @@ func main() {
 	e.POST("/api/admin/logout", authenticate_handler.Au(admin_handler.Logout()))
 
 	/*  - 管理者 - */
-	//e.POST("/api/admin/password/update", authenticate_handler.Ad(account_handler.UpdateName()))
-	//e.POST("/api/admin/consent/update", authenticate_handler.Ad(account_handler.UpdateName()))
-	//e.POST("/api/admin/event/certificate", authenticate_handler.Ad(account_handler.UpdateName()))
+	/* 同意書 */
+	//e.POST("/api/admin/consent/create", admin_handler.Ad(consent_handler.Create()))
+	//e.POST("/api/admin/consent/update", admin_handler.Ad(consent_handler.Update()))
+	//e.POST("/api/admin/consent/delete", admin_handler.Ad(consent_handler.Delete()))
+	/* イベント */
+	//e.POST("/api/admin/event/certificate", admin_handler.Ad(event_handler.Certificate()))
 
 	/*  - ユーザ - */
 
@@ -95,7 +98,9 @@ func main() {
 	e.POST("/api/event/name/update", authenticate_handler.Au(event_handler.UpdateName()))
 	e.POST("/api/event/description/update", authenticate_handler.Au(event_handler.UpdateDescription()))
 	e.POST("/api/event/open/update", authenticate_handler.Au(event_handler.UpdateOpen()))
-	//e.POST("/api/event/consent/accept", authenticate_handler.Au(account_handler.AcceptConsent()))
+
+	/* 同意書 */
+	//e.POST("/api/event/consent/accept", authenticate_handler.Au(consent_handler.AcceptConsent()))
 
 	/* 候補日 */
 	e.POST("/api/candidate/create", authenticate_handler.Au(candidate_handler.Create()))

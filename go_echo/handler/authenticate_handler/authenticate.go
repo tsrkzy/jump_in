@@ -352,25 +352,3 @@ func authorized(c echo.Context) error {
 		return nil
 	}
 }
-
-// Ad
-// API(HandlerFunc)の呼び出しに管理者権限の認証をかける
-// Auと一緒
-func Ad(f echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		err := isAdmin(c)
-		if err != nil {
-			return c.JSON(http.StatusUnauthorized, response_types.ErrorGen("管理者ログインが必要です"))
-		}
-
-		return f(c)
-	}
-}
-
-func isAdmin(c echo.Context) error {
-
-	/* chocochipでInvitationとAdminが取得できるか */
-	/* Invitationがauthorizedであること */
-	/* Invitationがexpiredでないこと */
-	return nil
-}
