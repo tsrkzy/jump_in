@@ -20,5 +20,5 @@ CMD ["./bin/air", "-c", ".air.toml"]
 #
 # Production
 #
-# RUN go build -v -o /usr/local/bin/app
-# CMD ["/usr/local/bin/app"]
+#RUN go build -v -o /usr/local/bin/app
+#CMD ["/usr/local/bin/app"]

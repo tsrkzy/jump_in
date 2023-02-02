@@ -192,7 +192,7 @@ func Logout() echo.HandlerFunc {
 			s.Options = &sessions.Options{
 				MaxAge:   -1,
 				HttpOnly: true,
-				Secure:   true,
+				Secure:   false, // http
 				Path:     "/",
 			}
 			return nil

@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/gommon/log"
 	"github.com/tsrkzy/jump_in/database"
 	"github.com/tsrkzy/jump_in/helper"
+	"github.com/tsrkzy/jump_in/logic/lg"
 	"net/http"
 	"time"
 )
@@ -45,7 +46,7 @@ func Open(c echo.Context, db *database.MyDB, callbackFn func(*sessions.Session) 
 	ss.Options = &sessions.Options{
 		MaxAge:   60 * 30,
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   false, // http
 		Path:     "/",
 	}
 
@@ -55,6 +56,7 @@ func Open(c echo.Context, db *database.MyDB, callbackFn func(*sessions.Session) 
 			panic(p)
 		}
 		/* session.Saveのerrをそのまま外に流す */
+		lg.Debug("session.save()")
 		err = ss.Save(c.Request(), c.Response())
 	}()
 
