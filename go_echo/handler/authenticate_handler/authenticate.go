@@ -51,12 +51,6 @@ func Authenticate() echo.HandlerFunc {
 		err = myDB.Tx(ctx, func(tx *sql.Tx) error {
 			/* Open SessionStore */
 			return sess.Open(c, myDB, func(s *sessions.Session) error {
-				s.Options = &sessions.Options{
-					MaxAge:   60 * 5,
-					HttpOnly: true,
-					Secure:   true,
-					Path:     "/",
-				}
 
 				/* スロットル: 同じメールアドレスについて、10分に3回まで */
 				mailAddress := r.MailAddress
@@ -171,13 +165,7 @@ func MagicLink() echo.HandlerFunc {
 				}
 				lg.Debug("magic-link authorised")
 
-				/* セッション変数をログイン済みに昇格、寿命を3時間に */
-				s.Options = &sessions.Options{
-					MaxAge:   60 * 60 * 3,
-					HttpOnly: true,
-					Secure:   true,
-					Path:     "/",
-				}
+				/* セッション変数をログイン済みに昇格 */
 				lg.Debugf("session choco_chip promoted: %s", chocoChip)
 
 				return nil

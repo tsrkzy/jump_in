@@ -8,6 +8,7 @@ import (
 	"github.com/tsrkzy/jump_in/database"
 	"github.com/tsrkzy/jump_in/helper"
 	"net/http"
+	"time"
 )
 
 var svNameChocochip string
@@ -31,12 +32,21 @@ func Open(c echo.Context, db *database.MyDB, callbackFn func(*sessions.Session) 
 		return err
 	}
 	defer pgs.Close()
+	defer pgs.StopCleanup(pgs.Cleanup(time.Second * 30))
 
 	/* cookieからセッション取得 */
 	sName := helper.MustGetenv("SESSION_NAME")
 	ss, err := pgs.Get(c.Request(), sName)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
+	}
+
+	/* 初期化 基本は30分 */
+	ss.Options = &sessions.Options{
+		MaxAge:   60 * 30,
+		HttpOnly: true,
+		Secure:   true,
+		Path:     "/",
 	}
 
 	defer func() {
